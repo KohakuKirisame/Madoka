@@ -1,2 +1,2 @@
 # Madoka
-圆Madoka is the online system for NBMUN
+圆Madoka is the online system for NBMUN Stellaris system.
