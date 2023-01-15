@@ -1,7 +1,11 @@
 <?php
 
 namespace app\Models;
-
-class PlanetType extends \Illuminate\Database\Eloquent\Model {
-
+use Illuminate\Database\Eloquent\Model;
+class PlanetType extends Model {
+    protected $fillable = [
+        'name','localization','carryAble',
+        'human','fox','deer','krik','robot',
+        'created_at','updated_at'
+    ];
 }

@@ -1,7 +1,10 @@
 <?php
 
 namespace app\Models;
-
-class Population extends \Illuminate\Database\Eloquent\Model {
-
+use Illuminate\Database\Eloquent\Model;
+class Population extends Model {
+    protected $fillable = [
+        'species','position','job','workat','ethic','ig','party','cash','struggle',
+        'created_at','updated_at'
+    ];
 }

@@ -2,20 +2,37 @@
 
 namespace app\Http\Controllers;
 use app\Models\Planet;
+use app\Models\PlanetType;
+use app\Models\Population;
 
 class PlanetController extends Controller {
 
-    private $name;
+    private int $id;
+    private var $position,$name,$type,$size,$owner,$controller,$leaderParty,$popGrowthProcess;
+    private array $pops;
+    private array $districts;
+    private array $product;
+
+
     function __construct($id) {
-        $planet=Planet::where(["id"=>$id])->first();
-        $this->name = $planet->name;
+        $p =Planet::where(["id"=>$id])->first();
+        $this->id = $id;
+        $this->name = $p ->name;
+        $this->position = $p->position;
+        $this->type = $p->type;
+        $this->size = $p->size;
+        $this->owner = $p->owner;
+        $this->controller = $p->controller;
+        $this->pops = json_decode($p->pops,true);
+        $this->popGrowthProcess = $p->popGrowthProcess;
+        $this->districts = json_decode($p->districts,true);
+        $this->product = json_decode($p->product,true);
+        $this->leaderParty = $p->leaderParty;
     }
 
     function popGrowth(){
-        $type = $this->type;
-        $result = $conn->query("SELECT * FROM PlanetTypes WHERE name='$type'");
-        $typeD = $result->fetch_assoc();
-        $carryAble = $typeD['carryAble'] * $this->size;
+        $typeD = PlanetType::where(["name"=>$this->type])->first;
+        $carryAble = $typeD->carryAble * $this->size;
         $growth = 0;
         if ($carryAble > 2*count($this->pops)) {
             $growth = 3*max(0.125*(count($this->pops)-(count($this->pops)*count($this->pops)/$carryAble)-1),1);
@@ -31,8 +48,11 @@ class PlanetController extends Controller {
         }
         $this->popGrowthProcess += $growth;
         if ($this->popGrowthProcess >= 100) {
-            $result = $conn->query("SELECT * FROM Pops");
-            $pops = $result->fetch_all();
+            $result = Population::get();//$conn->query("SELECT * FROM Pops");
+            $pops = [];
+            foreach ($result as $item) {
+                $pops[] = $item;
+            }
             $id = 0;
             foreach ($pops as $key => $value) {
                 if ($value[0] > $id ) {
@@ -53,6 +73,5 @@ class PlanetController extends Controller {
             $this->popGrowthProcess = $this->popGrowthProcess-100;
         }
         $this->updatePlanet();
-        $conn->close();
     }
 }
