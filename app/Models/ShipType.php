@@ -1,7 +1,11 @@
 <?php
 
 namespace app\Models;
-
-class ShipType extends \Illuminate\Database\Eloquent\Model {
-
+use Illuminate\Database\Eloquent\Model;
+class ShipType extends Model {
+    protected $fillable = [
+        'type','name','commandPoints','baseCost','buildTime',
+        'baseHull','baseEvasion','baseSpeed','baseEDamage','basePDamage','baseArmor','baseShield','disengageChance',
+        'created_at','updated_at'
+    ];
 }
