@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\UserController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,4 +17,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/Dashboard', function () {
+    return view('dashboard');
+})->middleware("isAuthedByReimu");
+
+Route::prefix("Action")->group(function (){
+    Route::get("/Login",[UserController::class,"Auth"]);
+    Route::get("/Logout",[UserController::class,"LogOut"]);
 });
