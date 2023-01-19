@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,9 +20,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/Dashboard', function () {
-    return view('dashboard');
-})->middleware("isAuthedByReimu");
+Route::get('/Dashboard',[UserController::class,"ShowDashboard"])->middleware("isAuthedByReimu");
+
+Route::get('/Login',function () {
+    if (Session::exists("uid")&&Session::get("valid")>time()) {
+        return redirect("/Dashboard");
+    } else {
+        Session::flush();
+        return view("login");
+    }
+});
 
 Route::prefix("Action")->group(function (){
     Route::get("/Login",[UserController::class,"Auth"]);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -34,7 +35,7 @@ class UserController extends Controller {
         return redirect("/");
     }
 
-    public function IsAuthed(Request $request){
+    static public function IsAuthed(Request $request){
         if($request->session()->exists(["uid","token"])){
             return true;
         }else{
@@ -66,5 +67,11 @@ class UserController extends Controller {
         $result=file_get_contents($_ENV["REIMU_URL"]."/includes/query.php", false, $context);
         $result=json_decode($result,associative: true);
         return $result;
+    }
+
+    public function ShowDashboard(Request $request){
+        $uid=$request->session()->get("uid");
+        $privilege=User::where("uid",$uid)->first()->privilege;
+        return view("dashboard",["privilege"=>$privilege]);
     }
 }

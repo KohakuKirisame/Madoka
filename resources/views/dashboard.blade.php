@@ -12,7 +12,7 @@
 				<p>123</p>
 			</div>
 			<div class="col-md-9">
-                <p>111</p>
+                <p>我草！你是：@if($privilege==0)超级管理员@elseif($privilege==1)管理员@elseif($privilege==2)代表@endif</p>
 			</div>
 		</div>
 	</div>
