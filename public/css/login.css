@@ -1,0 +1,22 @@
+.bgimg{
+    position: absolute;
+    z-index: -99;
+    height: 100%;
+    width: 100%;
+    background: url(/storage/img/bg.jpg) no-repeat center center;
+    background-size: cover;
+    transition: all 0.5s ease-in-out;
+}
+
+.center-content{
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,.25);
+}
+
+.imgblur{
+    filter: blur(5px) brightness(75%);
+    -webkit-filter: blur(5px) brightness(75%);
+}
