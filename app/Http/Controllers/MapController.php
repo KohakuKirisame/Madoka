@@ -22,4 +22,8 @@ class MapController extends Controller {
         }
     }
 
+    public function changeOwner(Request $request){
+        $id=$request->input("id");
+    }
+
 }
