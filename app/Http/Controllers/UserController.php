@@ -61,7 +61,6 @@ class UserController extends Controller {
             'header' => 'Content-type:application/x-www-form-urlencoded',
             'content' => $data,
             'timeout' => 15 * 60,
-            ''
         ));
         $context=stream_context_create($options);
         $result=file_get_contents($_ENV["REIMU_URL"]."/includes/query.php", false, $context);
@@ -71,7 +70,11 @@ class UserController extends Controller {
 
     public function ShowDashboard(Request $request){
         $uid=$request->session()->get("uid");
-        $privilege=User::where("uid",$uid)->first()->privilege;
+        if(User::where("uid",$uid)->exists()) {
+            $privilege = User::where("uid", $uid)->first()->privilege;
+        }else{
+            return redirect("https://kanade.nbmun.cn");
+        }
         return view("dashboard",["privilege"=>$privilege]);
     }
 }

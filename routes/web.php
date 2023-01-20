@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MapController;
 use Illuminate\Support\Facades\Session;
 
 /*
@@ -35,3 +36,5 @@ Route::prefix("Action")->group(function (){
     Route::get("/Login",[UserController::class,"Auth"]);
     Route::get("/Logout",[UserController::class,"LogOut"]);
 });
+
+Route::get('/Map',[MapController::class,"getData"])->middleware("isAuthedByReimu");
