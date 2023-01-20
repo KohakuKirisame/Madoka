@@ -277,6 +277,14 @@ class PlanetController extends Controller {
         }
         $this->updatePlanet();
     }
+    //贸易中心搜索//
+    function searchTradeHub() {
+        $stars = Star::get()->toArray();
+        foreach ($stars as $key => $value) {
+            $stars[$key]['hyperlane'] = json_decode($value['hyperlane'],true);
+        }
+
+    }
 
 
 }
