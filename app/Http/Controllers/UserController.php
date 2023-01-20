@@ -26,7 +26,7 @@ class UserController extends Controller {
             return view("login_failed");
         }else{
             $request->session()->put(["uid"=>intval($result["uid"]),"token"=>$result["token"],"valid"=>time()+43200]);
-            return redirect("/");
+            return redirect("/Dashboard");
         }
     }
 

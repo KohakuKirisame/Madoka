@@ -43,12 +43,16 @@ class MapController extends Controller {
                     Country::where(["tag"=>$lastOwner])->update(["stars"=>$lastCStars]);
                 }
                 Star::where(["id"=>$id])->update(["owner"=>$newOwner,"controller"=>$newOwner]);
-                $c = Country::where(["tag"=>$newOwner])->first();
-                $CStars = json_decode($c->stars,true);
-                $CStars[] = $id*1;
-                $CStars = json_encode($CStars,JSON_UNESCAPED_UNICODE);
-                Countries::where(["tag"=>$newOwner])->update(["stars"=>$CStars]);
-                echo $c->color;
+                if (!$newOwner == '') {
+                    $c = Country::where(["tag" => $newOwner])->first();
+                    $CStars = json_decode($c->stars, true);
+                    $CStars[] = $id * 1;
+                    $CStars = json_encode($CStars, JSON_UNESCAPED_UNICODE);
+                    Country::where(["tag" => $newOwner])->update(["stars" => $CStars]);
+                    echo $c->color;
+                }else{
+                    echo "#ffffff";
+                }
                 return;
             }
         }else {

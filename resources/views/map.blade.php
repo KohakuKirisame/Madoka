@@ -13,6 +13,10 @@
             color: black;
         }
     </style>
+    <script type="application/javascript" src="{{asset('js/map.js')}}">
+
+    </script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
 <div class="container">
@@ -23,17 +27,14 @@
             $y = $stars[$i]['y']*3+960;
 			$country = $stars[$i]['owner'];
         @endphp
-
         @foreach($countrys as $key => $value)
-
             @if($value['tag'] == $country)
                 @php
-
                     $countryColor = $value['color'];
                 @endphp
             @endif
         @endforeach
-        @if (!isset($countryColor))
+        @if ($country == '')
             @php
                 $countryColor = '#ffffff';
             @endphp
@@ -53,7 +54,7 @@
             <li><a class='dropdown-item' onclick='changeOwner({{$stars[$i]['id']}},"")'>无</a></li>
             @for ($j=0; $j < count($countrys); $j++)
                 <li><a class='dropdown-item'
-                       onclick='changeOwner({{$stars[$i]['id']}},{{$countrys[$j]['id']}})'>{{$countrys[$j]['name']}}</a>
+                       onclick='changeOwner({{$stars[$i]['id']}},"{{$countrys[$j]['tag']}}")'>{{$countrys[$j]['name']}}</a>
                 </li>
             @endfor
         </ul>
