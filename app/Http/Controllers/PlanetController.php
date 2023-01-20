@@ -37,7 +37,7 @@ class PlanetController extends Controller {
         $districts = json_encode($this->districts,JSON_UNESCAPED_UNICODE);
         $product = json_encode($this->product,JSON_UNESCAPED_UNICODE);
         Planet::where(["id"=>$this->id])->update(["position"=>$this->position,"name"=>$this->name,"size"=>$this->size,"controller"=>$this->controller,"pops"=>$pops,"popGrowthProcess"=>$this->popGrowthProcess,
-                                            "districts"=>$districts,"product"=>$product,"leaderParty"=>$this->leaderParty]);
+            "districts"=>$districts,"product"=>$product,"leaderParty"=>$this->leaderParty]);
     }
     //资源计算//
     function countRes() {
