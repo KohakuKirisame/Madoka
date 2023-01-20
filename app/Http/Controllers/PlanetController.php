@@ -62,7 +62,7 @@ class PlanetController extends Controller {
     //区划计算//
     function districtCount() {
         $market = new MarketController($this->controller);
-        $result = Country::where(["id" => $this->owner]) - first();
+        $result = Country::where(["tag" => $this->owner]) - first();
         $dTax = $result->districtTax;
         $upTax = $result->upTax;
         $midTax = $result->midTax;
@@ -116,12 +116,12 @@ class PlanetController extends Controller {
                         $supply = json_decode($value3->supply, true);
                         foreach ($demand as $goods => $value4) {
                             $modifierName = Definition::where(["area" => "economy", "economyKey" => "consume", "modifierKey" => $key2])->first()->modifierName;
-                            $modifier = 1 + Country::where(["id" => $this->owner])->first()->$modifierName;
+                            $modifier = 1 + Country::where(["tag" => $this->owner])->first()->$modifierName;
                             $this->districts[$key]['product'][$goods] -= $value4 * $modifier;
                         }
                         foreach ($supply as $goods => $value4) {
                             $modifierName = Definition::where(["area" => "economy", "economyKey" => "produce", "modifierKey" => $key2])->first()->modifierName;
-                            $modifier = 1 + Country::where(["id" => $this->owner])->first()->$modifierName;
+                            $modifier = 1 + Country::where(["tag" => $this->owner])->first()->$modifierName;
                             $this->districts[$key]['product'][$goods] += $value4 * $modifier;
                         }
                     }
@@ -198,6 +198,13 @@ class PlanetController extends Controller {
                             }
                         }
                     }
+                    if ($this->districts[$key]['ownership'] == 3) {
+                        if ($this->districts[$key]['cash'] < 0) {
+                            $energy = Country::where(["tag"=>$this->owner])->first()->energy;
+                            Country::where(["tag"=>$this->owner])->update(["energy" => $energy+$this->districts[$key]['cash']]);
+                            $this->districts[$key]['cash'] = 0;
+                        }
+                    }
                     if ($this->districts[$key]['cash'] - $cash0 < 0) {
                         $this->districts[$key]['profit'] = $this->districts[$key]['cash'] - $cash0;
                         continue;
@@ -212,6 +219,9 @@ class PlanetController extends Controller {
                     foreach ($this->districts as $key2 => $value2) {
                         $sizeAll += $value2['size'];
                     }
+                    if ($this->districts[$key]['ownership'] == 3) {
+                        continue;
+                    }
                     if ($sizeAll += 1 < $this->size && $this->districts[$key]['cash'] > 2 * $disData->buildCost) {
                         $this->districts[$key]['size'] += 1;
                         $this->districts[$key]['cash'] -= $this->districts[$key]['cash'] - $disData->buildCost;
@@ -225,7 +235,7 @@ class PlanetController extends Controller {
             }
             if ($this->product['energy'] < 0) {
                 $energyProduce = -$this->product['energy'];
-                $modifier = Country::where(["id" => $this->owner])->first()->energuProduceModifier;
+                $modifier = Country::where(["tag" => $this->owner])->first()->energuProduceModifier;
                 $this->product['energy'] = $energyProduce * $modifier;
             }
             $this->countRes();
