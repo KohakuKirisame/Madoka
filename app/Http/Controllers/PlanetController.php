@@ -283,6 +283,18 @@ class PlanetController extends Controller {
         foreach ($stars as $key => $value) {
             $stars[$key]['hyperlane'] = json_decode($value['hyperlane'],true);
         }
+        $getFlag = False;
+        $searchArray = array();
+        $searchArray[] = $this->position;
+        $nextArray = array();
+        foreach ($stars[$this->position]['hyperlane'] as $key => $value) {
+            $nextArray[] = $value['to'];
+        }
+        while ($getFlag != true) {
+            foreach ($nextArray as $key => $value) {
+
+            }
+        }
 
     }
 
