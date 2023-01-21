@@ -290,6 +290,36 @@ class PlanetController extends Controller {
         $this->updatePlanet();
     }
     //贸易中心搜索//
+
+    function searchNearestHub($hubArray) {
+        $hyperLanes=Star::where("id",$this->position)->first()->hyperlane;
+        $hyperLanes=json_decode($hyperLanes,true);
+        $queue = [];
+        if(Station::where("position",$this->position)->first()->isTradeHub==1){
+            return([$this->position,0]);
+        }
+        $depth=1;
+        while(true){
+            foreach($hyperLanes as $hyperLane){
+                $queue[] = [$hyperLane["to"],$depth];
+                if (in_array($hyperLane["to"],$hubArray)){
+                    $isReached=true;
+                    $target=$hyperLane["to"];
+                    break;
+                }
+            }
+            if ($isReached){
+                return([$target,$depth]);
+            }else{
+                $start=array_shift($queue);
+                $hyperLanes=Star::where("id",$start[0])->first()->hyperlane;
+                $hyperLanes=json_decode($hyperLanes,true);
+                $depth=$start[1]+1;
+            }
+        }
+
+    }
+
     function searchTradeHub() {
         $stars = Star::get()->toArray();
         $hubArray = [];
