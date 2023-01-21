@@ -8,6 +8,8 @@ use app\Models\PlanetType;
 use app\Models\Population;
 use app\models\District;
 use app\models\Job;
+use app\Models\Star;
+use App\Models\Station;
 
 class PlanetController extends Controller {
 
@@ -290,22 +292,19 @@ class PlanetController extends Controller {
     //贸易中心搜索//
     function searchTradeHub() {
         $stars = Star::get()->toArray();
+        $hubArray = [];
         foreach ($stars as $key => $value) {
             $stars[$key]['hyperlane'] = json_decode($value['hyperlane'],true);
-        }
-        $getFlag = False;
-        $searchArray = array();
-        $searchArray[] = $this->position;
-        $nextArray = array();
-        foreach ($stars[$this->position]['hyperlane'] as $key => $value) {
-            $nextArray[] = $value['to'];
-        }
-        while ($getFlag != true) {
-            foreach ($nextArray as $key => $value) {
-
+            if ($stars[$key]['stationType'] != '' && $stars[$key]['stationType'] != 'outpost') {
+                $isTradeHub = Station::where(["position" => $value['id']])->first()->isTradeHub;
+                if ($stars[$key]['owner'] == $this->owner && $isTradeHub == 1) {
+                    $hubArray[] = $value['id'];
+                }
             }
         }
-
+        $ans = $this->searchNearestHub($hubArray);
+        $target = $ans[0];
+        $length = $ans[1];
     }
 
 
