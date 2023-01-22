@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class Planet extends Model {
     protected $fillable = [
         'name','position','type','size','owner','controller','pops',
-        'popGrowthProcess','districts','product','leaderParty',
+        'popGrowthProcess','districts','product','nearTradeHub','tradeHubDistance','leaderParty',
         'created_at','updated_at'
     ];
 }

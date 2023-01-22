@@ -5,7 +5,7 @@ namespace App\Models;
 class Country extends \Illuminate\Database\Eloquent\Model{
     protected $table = 'country';
     protected $fillable = [
-        'name','color','capital','energy','stars','planets','storage',
+        'name','color','capital','energy','stars','planets','storage','cashPool',
         'atWarWith','alliedWith','financeList','policyList','districtTax',
         'upPopTax','midPopTax','lowPopTax','ethicsM','ethicsAM','ethicsE','ethicsAE','ethicsP','ethicsAP','ethicsX','ethicsAX',
         'energyProduceModifier','mineralsProduceModifier','grainProduceModifier','consumeGoodsProduceModifier','alloysProduceModifier','gasesProduceModifier','motesProduceModifier','crystalsProduceModifier',
