@@ -39,26 +39,44 @@
                 $countryColor = '#ffffff';
             @endphp
         @endif
-    <div>
-        <button type='button' class='btn btn-default dropdown-toggle'
-                style='position: absolute;
-                        top: {{$y-13.75}}px; left: {{$x-13.75}}px; width: 27.5px;height: 27.5px;
-                        border-radius: 100%;
-                        background-color:{{$countryColor}};
-                        border:none ;
-                        padding:0px 0px'
-                id='MenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
-                data-bs-target='#star-{{$stars[$i]['id']}}'>
-        </button>
-        <ul class='dropdown-menu' aria-labelledby='MenuLink-{{$stars[$i]['id']}}' id='star-{{$stars[$i]['id']}}'>
-            <li><a class='dropdown-item' onclick='changeOwner({{$stars[$i]['id']}},"")'>无</a></li>
-            @for ($j=0; $j < count($countrys); $j++)
-                <li><a class='dropdown-item'
-                       onclick='changeOwner({{$stars[$i]['id']}},"{{$countrys[$j]['tag']}}")'>{{$countrys[$j]['name']}}</a>
-                </li>
-            @endfor
-        </ul>
-    </div>
+        <div>
+            <button type='button' class='btn btn-default dropdown-toggle'
+                    style='position: absolute;
+                            top: {{$y-13.75}}px; left: {{$x+13.75}}px; width: 12px;height: 12px;
+                            border-radius: 100%;
+                            background-color:hsla(0,0%,0%,0.00);
+                            border:none ;
+                            padding:0px 0px'
+                    id='PlanetMenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
+                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+            </button>
+            <ul class='dropdown-menu' aria-labelledby='PlanerMenuLink-{{$stars[$i]['id']}}' id='star-Planet-{{$stars[$i]['id']}}'>
+                <li><a class='dropdown-item' onclick='newPlanet({{$stars[$i]['id']}},"")'>无</a></li>
+                @for ($j=0; $j < count($countrys); $j++)
+                    <li><a class='dropdown-item'
+                           onclick='newPlanet({{$stars[$i]['id']}},"{{$countrys[$j]['tag']}}")'>{{$countrys[$j]['name']}}</a>
+                    </li>
+                @endfor
+            </ul>
+            <button type='button' class='btn btn-default dropdown-toggle'
+                    style='position: absolute;
+                            top: {{$y-13.75}}px; left: {{$x-13.75}}px; width: 27.5px;height: 27.5px;
+                            border-radius: 100%;
+                            background-color:{{$countryColor}};
+                            border:none ;
+                            padding:0px 0px'
+                    id='MenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
+                    data-bs-target='#star-{{$stars[$i]['id']}}'>
+            </button>
+            <ul class='dropdown-menu' aria-labelledby='MenuLink-{{$stars[$i]['id']}}' id='star-{{$stars[$i]['id']}}'>
+                <li><a class='dropdown-item' onclick='changeOwner({{$stars[$i]['id']}},"")'>无</a></li>
+                @for ($j=0; $j < count($countrys); $j++)
+                    <li><a class='dropdown-item'
+                           onclick='changeOwner({{$stars[$i]['id']}},"{{$countrys[$j]['tag']}}")'>{{$countrys[$j]['name']}}</a>
+                    </li>
+                @endfor
+            </ul>
+        </div>
     @endfor
 </div>
     <canvas id="canvas_1">

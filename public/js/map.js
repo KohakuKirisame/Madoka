@@ -11,3 +11,16 @@ function changeOwner(id,owner) {
         $("#MenuLink-"+id).css("background-color",color);
     })
 }
+function newPlanet(id,type) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/newPlaner',{
+        id : id,
+        type : type,
+    },function() {
+
+    })
+}

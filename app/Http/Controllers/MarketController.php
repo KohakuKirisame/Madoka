@@ -111,7 +111,7 @@ class MarketController extends Controller {
         $stars = Star::get()->toArray();
         $hubArray = [];
         foreach ($stars as $key => $value) {
-            $stars[$key]['hyperlane'] = json_decode($value['hyperlane'],true);
+            $stars[$key]['hyperlane'] = json_decode($value['hyperlane'], true);
             if ($stars[$key]['stationType'] != '' && $stars[$key]['stationType'] != 'outpost') {
                 $isTradeHub = Station::where(["position" => $value['id']])->first()->isTradeHub;
                 if ($stars[$key]['owner'] == $targetCountry && $isTradeHub == 1) {
@@ -119,8 +119,8 @@ class MarketController extends Controller {
                 }
             }
         }
-        $hyperLanes=Star::where("id",$start)->first()->hyperlane;
-        $hyperLanes=json_decode($hyperLanes,true);
+        $hyperLanes = Star::where("id", $start)->first()->hyperlane;
+        $hyperLanes = json_decode($hyperLanes, true);
         $queue = [];
         $depth = 1;
         while(true){
@@ -141,9 +141,14 @@ class MarketController extends Controller {
                 $hyperLanes=json_decode($hyperLanes,true);
                 $depth = $start[1] + 1;
             }
+            if ($prev == 0) {
+                break;
+            }
         }
-
+        var_dump($route);
+        $route = array_reverse($route);
     }
+
     function countTrade() {
     $country = Country::where(["tag"=>$this->owner])->first();
         foreach ($this->trades as $key => $value) {

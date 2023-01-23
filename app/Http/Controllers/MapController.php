@@ -58,7 +58,25 @@ class MapController extends Controller {
         }else {
             return redirect("https://kanade.nbmun.cn");
         }
-
+    }
+    public function newPlanet(Request $request) {
+        $uid = $request->session()->get('uid');
+        if(User::where("uid",$uid)->exists()) {
+            $privilege = User::where("uid", $uid)->first()->privilege;
+            if ($privilege == 0 || $privilege == 1) {
+                $id = $request->input("id");
+                $type = $request->input("type");
+                Planet::where(["position"=>$id])->update(["type"=>$type]);
+                if ($type == '') {
+                    Star::where(["id"=>$id])->update(["havePlanet"=>0]);
+                }
+                else {
+                    Star::where(["id"=>$id])->update(["havePlanet"=>1]);
+                }
+            }
+        }else {
+            return redirect("https://kanade.nbmun.cn");
+        }
     }
 
 }
