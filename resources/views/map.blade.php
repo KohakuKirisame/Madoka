@@ -10,7 +10,7 @@
 
         canvas {
             background-image: url({{asset('storage/img/map.png')}});
-            color: black;
+            color: #000000;
         }
     </style>
     <script type="application/javascript" src="{{asset('js/map.js')}}">

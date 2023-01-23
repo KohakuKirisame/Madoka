@@ -122,24 +122,44 @@ class MarketController extends Controller {
         $hyperLanes = Star::where("id", $start)->first()->hyperlane;
         $hyperLanes = json_decode($hyperLanes, true);
         $queue = [];
-        $depth = 1;
-        while(true){
-            foreach($hyperLanes as $hyperLane){
-                $queue[] = [$hyperLane["to"],$depth,$start];
-                if (in_array($hyperLane["to"],$hubArray)){
-                    $isReached=true;
-                    $target=$hyperLane["to"];
+        $previousStar = [$start, 0, 0];
+        $routeFinder = [[$start, 0],];
+        $visited = [$start,];
+        $isReached = false;
+        while (true) {
+            foreach ($hyperLanes as $hyperLane) {
+                if (!in_array($hyperLane["to"], $visited)) {
+                    $queue[] = [$hyperLane["to"], $previousStar[1] + 1, $previousStar[0]];
+                    $routeFinder[] = [$hyperLane["to"], $previousStar[0]];
+                    $visited[] = $hyperLane["to"];
+                }
+                if (in_array($hyperLane["to"], $hubArray)) {
+                    $isReached = true;
+                    $target = $hyperLane["to"];
                     break;
                 }
             }
-            if ($isReached){
-                $ans = [$target,$depth,$start];
+            if ($isReached) {
+                $ans = [$target, $previousStar[1] + 1, $previousStar[0]];
                 break;
-            }else{
-                $start=array_shift($queue);
-                $hyperLanes=Star::where("id",$start[0])->first()->hyperlane;
-                $hyperLanes=json_decode($hyperLanes,true);
-                $depth = $start[1] + 1;
+            } else {
+                $previousStar = array_shift($queue);
+                $hyperLanes = Star::where("id", $previousStar[0])->first()->hyperlane;
+                $hyperLanes = json_decode($hyperLanes, true);
+            }
+        }
+        unset($hyperLanes);
+        unset($queue);
+        $route = [$target,];
+        $prev = $ans[2];
+        while (true) {
+            foreach ($routeFinder as $item) {
+                if ($prev == 0) {
+                    break;
+                } elseif ($prev == $item[0]) {
+                    $route[] = $item[0];
+                    $prev = $item[1];
+                }
             }
             if ($prev == 0) {
                 break;
