@@ -12,7 +12,7 @@ class MapController extends Controller {
         $uid=$request->session()->get("uid");
         if(User::where("uid",$uid)->exists()) {
             $privilege = User::where("uid", $uid)->first()->privilege;
-            if ($privilege == 0) {
+            if (!is_null($privilege)) {
                 $stars = Star::get()->toArray();
                 $countries = Country::get()->toArray();
                 $stations = Station::get()->toArray();
@@ -20,7 +20,8 @@ class MapController extends Controller {
                 $planetTypes = PlanetType::get()->toArray();
                 return view("map",["stars"=>$stars,"countrys"=>$countries,
                     "stations"=>$stations,"planets"=>$planets,
-                    "planetTypes"=>$planetTypes]);
+                    "planetTypes"=>$planetTypes,
+                    "privilege"=>$privilege]);
             }
         }else {
             return redirect("https://kanade.nbmun.cn");

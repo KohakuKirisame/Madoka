@@ -40,52 +40,70 @@
             @endphp
         @endif
         <div>
-            <button type='button' class='btn btn-default dropdown-toggle'
-                    style='position: absolute;
-                            top: {{$y-13.75}}px; left: {{$x+13.75}}px; width: 12px;height: 12px;
-                            border-radius: 100%;
-                            background-color:hsla(0,0%,0%,0.00);
-                            border:none ;
-                            padding:0px 0px'
-                    id='PlanetMenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
-                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
-                @if($stars[$i]['havePlanet'] == 1)
-                    @foreach($planets as $planet)
-                        @php
-                        if ($stars[$i]['id'] == $planet['position']) {
-                            $img = $planet['type'];
-                        }
-                        @endphp
-                    @endforeach
-                    <img src='img/planets/{{$img}}.png' width='12px'>
-                @endif
-            </button>
-            <ul class='dropdown-menu' aria-labelledby='PlanerMenuLink-{{$stars[$i]['id']}}' id='star-Planet-{{$stars[$i]['id']}}'>
-                <li><a class='dropdown-item' onclick='newPlanet({{$stars[$i]['id']}},"")'>无</a></li>
-                @for ($j=0; $j < count($planetTypes); $j++)
-                    <li><a class='dropdown-item'
-                           onclick='newPlanet({{$stars[$i]['id']}},"{{$countrys[$j]['name']}}")'>{{$countrys[$j]['localization']}}</a>
-                    </li>
-                @endfor
-            </ul>
-            <button type='button' class='btn btn-default dropdown-toggle'
-                    style='position: absolute;
-                            top: {{$y-13.75}}px; left: {{$x-13.75}}px; width: 27.5px;height: 27.5px;
-                            border-radius: 100%;
-                            background-color:{{$countryColor}};
-                            border:none ;
-                            padding:0px 0px'
-                    id='MenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
-                    data-bs-target='#star-{{$stars[$i]['id']}}'>
-            </button>
-            <ul class='dropdown-menu' aria-labelledby='MenuLink-{{$stars[$i]['id']}}' id='star-{{$stars[$i]['id']}}'>
-                <li><a class='dropdown-item' onclick='changeOwner({{$stars[$i]['id']}},"")'>无</a></li>
-                @for ($j=0; $j < count($countrys); $j++)
-                    <li><a class='dropdown-item'
-                           onclick='changeOwner({{$stars[$i]['id']}},"{{$countrys[$j]['tag']}}")'>{{$countrys[$j]['name']}}</a>
-                    </li>
-                @endfor
-            </ul>
+            @if ($privilege == 0 || $privilege == 1)
+                <button type='button' class='btn btn-default dropdown-toggle'
+                        style='position: absolute;
+                                top: {{$y-13.75}}px; left: {{$x+13.75}}px; width: 12px;height: 12px;
+                                border-radius: 100%;
+                                background-color:hsla(0,0%,0%,0.00);
+                                border:none ;
+                                padding:0px 0px'
+                        id='PlanetMenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
+                        data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+                    @if($stars[$i]['havePlanet'] == 1)
+                        @foreach($planets as $planet)
+                            @php
+                            if ($stars[$i]['id'] == $planet['position']) {
+                                $img = $planet['type'];
+                            }
+                            @endphp
+                        @endforeach
+                        <img src='img/planets/{{$img}}.png' width='12px'>
+                    @endif
+                </button>
+                <ul class='dropdown-menu' aria-labelledby='PlanerMenuLink-{{$stars[$i]['id']}}' id='star-Planet-{{$stars[$i]['id']}}'>
+                    <li><a class='dropdown-item' onclick='newPlanet({{$stars[$i]['id']}},"")'>无</a></li>
+                    @for ($j=0; $j < count($planetTypes); $j++)
+                        <li><a class='dropdown-item'
+                               onclick='newPlanet({{$stars[$i]['id']}},"{{$countrys[$j]['name']}}")'>{{$countrys[$j]['localization']}}</a>
+                        </li>
+                    @endfor
+                </ul>
+                <button type='button' class='btn btn-default dropdown-toggle'
+                        style='position: absolute;
+                                top: {{$y-13.75}}px; left: {{$x-13.75}}px; width: 27.5px;height: 27.5px;
+                                border-radius: 100%;
+                                background-color:{{$countryColor}};
+                                border:none ;
+                                padding:0px 0px'
+                        id='MenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
+                        data-bs-target='#star-{{$stars[$i]['id']}}'>
+                </button>
+                <ul class='dropdown-menu' aria-labelledby='MenuLink-{{$stars[$i]['id']}}' id='star-{{$stars[$i]['id']}}'>
+                    <li><a class='dropdown-item' onclick='changeOwner({{$stars[$i]['id']}},"")'>无</a></li>
+                    @for ($j=0; $j < count($countrys); $j++)
+                        <li><a class='dropdown-item'
+                               onclick='changeOwner({{$stars[$i]['id']}},"{{$countrys[$j]['tag']}}")'>{{$countrys[$j]['name']}}</a>
+                        </li>
+                    @endfor
+                </ul>
+            @endif
+            @elseif($priority == 2)
+                <button type='button' class='btn btn-default'
+                                  style='position: absolute;
+                        top: {{$y-13.75}}px; left: {{$x-13.75}}px; width: 27.5px;height: 27.5px;
+                        border-radius: 100%;
+                        background-color:{{$countryColor}};
+                        border:none ;
+                        padding:0px 0px'
+                                  data-bs-toggle='popover'
+                                  data-bs-trigger='hover'
+                                  data-bs-placement='top'
+                                  data-bs-container ='body'
+                                  title={{$stars[$i]['name']}}
+                                  data-bs-html='true'
+                                  data-bs-content='当前受控于{{$stars[$i]['controller']}}'
+            @endif
         </div>
     @endfor
 </div>
@@ -144,7 +162,10 @@
         ctx.drawImage(imgP, {{$x-15}}, {{$y-15}}, 24, 24);
         @endif
     @endfor
-
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+    })
 </script>
 @include('components.footer')
 </body>
