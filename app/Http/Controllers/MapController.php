@@ -13,9 +13,14 @@ class MapController extends Controller {
         if(User::where("uid",$uid)->exists()) {
             $privilege = User::where("uid", $uid)->first()->privilege;
             if ($privilege == 0) {
-                $stars=Star::get()->toArray();
-                $countries=Country::get()->toArray();
-                return view("map",["stars"=>$stars,"countrys"=>$countries]);
+                $stars = Star::get()->toArray();
+                $countries = Country::get()->toArray();
+                $stations = Station::get()->toArray();
+                $planets = Planet::get()->toArray();
+                $planetTypes = PlanetType::get()->toArray();
+                return view("map",["stars"=>$stars,"countrys"=>$countries,
+                    "stations"=>$stations,"planets"=>$planets,
+                    "planetTypes"=>$planetTypes]);
             }
         }else {
             return redirect("https://kanade.nbmun.cn");

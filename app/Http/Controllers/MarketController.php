@@ -107,7 +107,7 @@ class MarketController extends Controller {
         $this->UpdateMarket();
     }
     //贸易计算//
-    function newTrade($start,$targetCountry) {
+    function newTrade($start,$targetCountry,$resource,$num,$duration) {
         $stars = Star::get()->toArray();
         $hubArray = [];
         foreach ($stars as $key => $value) {
@@ -165,8 +165,10 @@ class MarketController extends Controller {
                 break;
             }
         }
-        var_dump($route);
         $route = array_reverse($route);
+        $this->trades[] = ["target"=>$targetCountry,"content"=>[$resource=>$num],"path"=>$route,"duration"=>$duration];
+        $trade = json_encode($this->trades,JSON_UNESCAPED_UNICODE);
+        Market::where(["owner"=>$this->owner])->update(["trades"=>$trade]);
     }
 
     function countTrade() {

@@ -49,12 +49,22 @@
                             padding:0px 0px'
                     id='PlanetMenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
                     data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+                @if($stars[$i]['havePlanet'] == 1)
+                    @foreach($planets as $planet)
+                        @php
+                        if ($stars[$i]['id'] == $planet['position']) {
+                            $img = $planet['type'];
+                        }
+                        @endphp
+                    @endforeach
+                    <img src='img/planets/{{$img}}.png' width='12px'>
+                @endif
             </button>
             <ul class='dropdown-menu' aria-labelledby='PlanerMenuLink-{{$stars[$i]['id']}}' id='star-Planet-{{$stars[$i]['id']}}'>
                 <li><a class='dropdown-item' onclick='newPlanet({{$stars[$i]['id']}},"")'>无</a></li>
-                @for ($j=0; $j < count($countrys); $j++)
+                @for ($j=0; $j < count($planetTypes); $j++)
                     <li><a class='dropdown-item'
-                           onclick='newPlanet({{$stars[$i]['id']}},"{{$countrys[$j]['tag']}}")'>{{$countrys[$j]['name']}}</a>
+                           onclick='newPlanet({{$stars[$i]['id']}},"{{$countrys[$j]['name']}}")'>{{$countrys[$j]['localization']}}</a>
                     </li>
                 @endfor
             </ul>
