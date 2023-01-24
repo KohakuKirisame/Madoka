@@ -19,24 +19,26 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
-<div class="container">
-
+    <div class="container">
     @for($i=0; $i < count($stars); $i++)
         @php
             $x = $stars[$i]['x']*3+960;
             $y = $stars[$i]['y']*3+960;
 			$country = $stars[$i]['owner'];
+			$type = $stars[$i]['type'];
         @endphp
         @foreach($countrys as $key => $value)
             @if($value['tag'] == $country)
                 @php
                     $countryColor = $value['color'];
+					$countryName = $value['name'];
                 @endphp
             @endif
         @endforeach
         @if ($country == '')
             @php
                 $countryColor = '#ffffff';
+				$countryName = '';
             @endphp
         @endif
         @if ($privilege == 0 || $privilege == 1)
@@ -130,7 +132,7 @@
             </button>
         @endif
     @endfor
-</div>
+    </div>
     <canvas id="canvas_1">
         <h1>您的浏览器不支持canvas, 请升级后重新访问</h1>
     </canvas>
@@ -140,12 +142,6 @@
     canvas_1.width = "1920";
     canvas_1.height = "1920";
     ctx.font = "10px sans-serif";
-    var imgBH = new Image();
-    imgBH.src = 'img/black_hole.png';
-    var imgN = new Image();
-    imgN.src = 'img/neutron.png';
-    var imgP = new Image();
-    imgP.src = 'img/pulsar.png';
     ctx.strokeStyle = 'black';
     @for ($i=0; $i < count($stars); $i++)
         @php
@@ -176,15 +172,6 @@
         ctx.stroke();
         ctx.fillStyle = 'white';
         ctx.fillText('{{$stars[$i]['name']}}', {{$x -22.5}}, {{$y +25}});
-        @if ($stars[$i]['type'] == 'black_hole')
-        ctx.drawImage(imgBH, {{$x -15}}, {{$y -15}}, 24, 24);
-
-        @elseif ($stars[$i]['type'] == 'neutron')
-        ctx.drawImage(imgN, {{$x -10}}, {{$y -10}}, 20, 20);
-
-        @elseif ($stars[$i]['type'] == 'pulsar')
-        ctx.drawImage(imgP, {{$x-15}}, {{$y-15}}, 24, 24);
-        @endif
     @endfor
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {

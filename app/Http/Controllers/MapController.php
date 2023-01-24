@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Country;
 use App\Models\Star;
 use App\Models\User;
+use App\Models\Station;
+use App\Models\Planet;
+use App\Models\PlanetType;
 use Illuminate\Http\Request;
 
 class MapController extends Controller {
@@ -84,7 +87,23 @@ class MapController extends Controller {
             if ($privilege == 0 || $privilege == 1) {
                 $id = $request->input("id");
                 $type = $request->input("type");
-                Planet::where(["position"=>$id])->update(["type"=>$type]);
+                $star = Star::where(["id"=>$id])->first();
+                if ($star->havePlanet == 0) {
+                    $newP = new Planet();
+                    $newP->position=$id;
+                    $newP->name = $star->name;
+                    $newP->type=$type;
+                    $newP->owner = '';
+                    $newP->controller = '';
+                    $newP->size = 20;
+                    $newP->pops = "[]";
+                    $newP->districts = "{}";
+                    $newP->product = '{"market":{"energy":0,"minerals":0,"grain":0,"consume_goods":0,"alloys":0,"gases":0,"motes":0,"crystals":0},"country":{"energy":0,"minerals":0,"grain":0,"consume_goods":0,"alloys":0,"gases":0,"motes":0,"crystals":0}}';
+                    $newP->save();
+                }
+                else {
+                    Planet::where(["position"=>$id])->update(["type"=>$type]);
+                }
                 if ($type == '') {
                     Star::where(["id"=>$id])->update(["havePlanet"=>0]);
                 }
