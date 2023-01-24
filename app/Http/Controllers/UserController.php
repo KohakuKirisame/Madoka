@@ -43,7 +43,7 @@ class UserController extends Controller {
         }
     }
 
-    public function GetInfo($uid_search){
+    static public function GetInfo($uid_search){
         ini_set("allow_url_fopen","On");
         $uid=Session::get("uid");
         $token=Session::get("token");
@@ -75,6 +75,7 @@ class UserController extends Controller {
         }else{
             return redirect("https://kanade.nbmun.cn");
         }
-        return view("dashboard",["privilege"=>$privilege]);
+        $user=$this->GetInfo($uid);
+        return view("dashboard",["privilege"=>$privilege,"user"=>$user]);
     }
 }

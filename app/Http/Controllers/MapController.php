@@ -36,7 +36,8 @@ class MapController extends Controller {
         if(User::where("uid",$uid)->exists()) {
             $privilege = User::where("uid", $uid)->first()->privilege;
             if (!is_null($privilege)) {
-                return view("mappage");
+                $user=UserController::GetInfo($uid);
+                return view("mappage",["user"=>$user]);
             }
         }else {
             return redirect("https://kanade.nbmun.cn");

@@ -1,16 +1,19 @@
 <?php
 
-namespace app\Http\Controllers;
+namespace App\Http\Controllers;
 use App\Models\Country;
 use App\Models\Definition;
-use app\Models\Planet;
-use app\Models\PlanetType;
-use app\Models\Population;
-use app\models\District;
-use app\models\Job;
+use App\Models\Planet;
+use App\Models\PlanetType;
+use App\Models\Population;
+use App\Models\District;
+use App\Models\Job;
 use App\Models\Species;
-use app\Models\Star;
+use App\Models\Star;
 use App\Models\Station;
+use App\Models\User;
+use App\Models\Good;
+use Illuminate\Http\Request;
 
 class PlanetController extends Controller {
 
@@ -20,22 +23,43 @@ class PlanetController extends Controller {
     public array $districts;
     public array $product;
 
-    function __construct($id) {
-        $p =Planet::where(["id"=>$id])->first();
-        $this->id = $id;
-        $this->name = $p ->name;
-        $this->position = $p->position;
-        $this->type = $p->type;
-        $this->size = $p->size;
-        $this->owner = $p->owner;
-        $this->controller = $p->controller;
-        $this->pops = json_decode($p->pops,true);
-        $this->popGrowthProcess = $p->popGrowthProcess;
-        $this->districts = json_decode($p->districts,true);
-        $this->product = json_decode($p->product,true);
-        $this->nearTradeHub = $p->nearTradeHub;
-        $this->tradeHubDistance = $p->tradeHubDistance;
-        $this->leaderParty = $p->leaderParty;
+    function __construct($id=-1) {
+        if($id!=-1){
+            $p =Planet::where(["id"=>$id])->first();
+            $this->id = $id;
+            $this->name = $p ->name;
+            $this->position = $p->position;
+            $this->type = $p->type;
+            $this->size = $p->size;
+            $this->owner = $p->owner;
+            $this->controller = $p->controller;
+            $this->pops = json_decode($p->pops,true);
+            $this->popGrowthProcess = $p->popGrowthProcess;
+            $this->districts = json_decode($p->districts,true);
+            $this->product = json_decode($p->product,true);
+            $this->nearTradeHub = $p->nearTradeHub;
+            $this->tradeHubDistance = $p->tradeHubDistance;
+            $this->leaderParty = $p->leaderParty;
+            $goods = Good::get()->toArray();
+            $goodsArray = [];
+            foreach ($this->product['market'] as $key => $value) {
+                $goodsArray[] = $key;
+            }
+            foreach ($goods as $good) {
+                if (!in_array($good['name'], $goodsArray)) {
+                    $this->product['market'][] = [$good['name']=>0];
+                }
+            }
+            foreach ($this->product['country'] as $key => $value) {
+                $goodsArray[] = $key;
+            }
+            foreach ($goods as $good) {
+                if (!in_array($good['name'], $goodsArray)) {
+                    $this->product['country'][] = [$good['name']=>0];
+                }
+            }
+        }
+
     }
     function updatePlanet() {
         $pops = json_encode($this->pops,JSON_UNESCAPED_UNICODE);
@@ -380,7 +404,7 @@ class PlanetController extends Controller {
                 }
             }
             $id +=1;
-            $p = new Pops($id);
+            $p = new PopController($id);
             $species = array();
             foreach ($pops as $key => $value) {
                 if ($value[2] == $this->id) {
@@ -436,8 +460,23 @@ class PlanetController extends Controller {
             }
         }
         $ans = $this->searchNearestHub($hubArray);
-        $target = $ans[0];
-        $length = $ans[1];
+        $this->nearTradeHub = $ans[0];
+        $this->tradeHubDistance = $ans[1];;
+        $this->updatePlanet();
+    }
+
+    public function planetPage(Request $request){
+        $uid = $request->session()->get('uid');
+        $privilege=User::where('id',$uid)->first()->privilege;
+        $user=UserController::GetInfo($uid);
+        $planets = Planet::paginate(10);//->toArray();
+        foreach ($planets as $planet) {
+            $planet['type'] = PlanetType::where('name',$planet['type'])->first()->localization;
+            $planet['position'] = Star::where(["id"=>$planet['position']])->first()->name;
+            $planet['pops']=explode(",",$planet['pops']);
+        }
+        return view('planet',["user"=>$user,"privilege"=>$privilege,
+                                "planets"=>$planets]);
     }
 
 

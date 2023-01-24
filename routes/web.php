@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\PlanetController;
+
 use Illuminate\Support\Facades\Session;
 
 /*
@@ -34,6 +36,8 @@ Route::get('/Login',function () {
 
 Route::get('/Map',[MapController::class,"mapPage"])->middleware("isAuthedByReimu");
 Route::get("/MapContent",[MapController::class,"getData"])->middleware("isAuthedByReimu");
+
+Route::get("/Planets",[PlanetController::class,"planetPage"])->middleware("isAuthedByReimu");
 
 Route::prefix("Action")->group(function (){
     Route::get("/Login",[UserController::class,"Auth"]);

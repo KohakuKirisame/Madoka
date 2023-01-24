@@ -28,23 +28,24 @@ class MarketController extends Controller {
         $this->member = json_decode($m->member,true);
         $this->planets = json_decode($m->planets,true);
         $this->trades = json_decode($m->trades,true);
-        $this->goods = array('minerals' => json_decode($m->minerals,true));
-        $this->goods += array('grain'=>json_decode($m->grain,true));
-        $this->goods += array('consume_goods'=>json_decode($m->consume_goods,true));
-        $this->goods += array('alloys'=>json_decode($m->alloys,true));
-        $this->goods += array('gases'=>json_decode($m->gases,true));
-        $this->goods += array('motes'=>json_decode($m->motes,true));
-        $this->goods += array('crystals'=>json_decode($m->crystals,true));
+        $this->goods = json_decode($m->goods,true);
+        $goods = Good::get()->toArray();
+        $goodsArray = [];
+        foreach ($this->goods as $key => $value) {
+            $goodsArray[] = $key;
+        }
+        foreach ($goods as $good) {
+            if (!in_array($good['name'], $goodsArray)) {
+                $this->goods[] = [$good['name']=>["demandOrder"=>0,"supplyOrder"=>0,"price"=>$good['basePrice']]];
+            }
+        }
     }
     function UpdateMarket(){
         $member = json_encode($this->member,JSON_UNESCAPED_UNICODE);
         $planets = json_encode($this->planets,JSON_UNESCAPED_UNICODE);
         $trades = json_encode($this->trades,JSON_UNESCAPED_UNICODE);
-        Market::where(["owner"=>$this->owner])->update(["mamber"=>$member,"planets"=>$planets,"trades"=>$trades]);
-        foreach ($this->goods as $key => $value) {
-            $value = json_encode($value,JSON_UNESCAPED_UNICODE);
-            Market::where(["owner"=>$this->owner])->update(["$key"=>$value]);
-        }
+        $goods = json_encode($this->goods,JSON_UNESCAPED_UNICODE);
+        Market::where(["owner"=>$this->owner])->update(["member"=>$member,"planets"=>$planets,"trades"=>$trades,"goods"=>$goods]);
     }
     //价格计算//
     function priceCount() {
