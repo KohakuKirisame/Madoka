@@ -8,6 +8,7 @@ use app\Models\PlanetType;
 use app\Models\Population;
 use app\models\District;
 use app\models\Job;
+use App\Models\Species;
 use app\Models\Star;
 use App\Models\Station;
 
@@ -75,11 +76,12 @@ class PlanetController extends Controller {
     //区划计算//
     function districtCount() {
         $market = new MarketController($this->controller);
-        $result = Country::where(["tag" => $this->owner]) - first();
-        $dTax = $result->districtTax;
-        $upTax = $result->upTax;
-        $midTax = $result->midTax;
-        $lowTax = $result->lowTax;
+        $country = Country::where(["tag" => $this->owner]) - first();
+        $country->species = json_decode($country->species,true);
+        $dTax = $country->districtTax;
+        $upTax = $country->upTax;
+        $midTax = $country->midTax;
+        $lowTax = $country->lowTax;
         $jobData = Job::get()->toArray();
         foreach ($this->districts as $key => $value) {
             $disData = District::where(["name" => $key])->first;
@@ -88,7 +90,7 @@ class PlanetController extends Controller {
                     $value['size'] = floor(count($this->pops) / 10);
                 }
                 $value['profit'] = 10000;
-                if ($result->economyType == 1) {
+                if ($country->economyType == 1) {
                     continue;
                 }
                 foreach ($value['jobs'] as $key2 => $value2) {
@@ -122,9 +124,9 @@ class PlanetController extends Controller {
             }
             foreach ($value['jobs'] as $key2 => $value2) {
                 foreach ($value2 as $key3 => $value3) {
-                    $popJob = Population::where(["id" => $value3])->first()->job;
+                    $pop = Population::where(["id" => $value3])->first();
                     foreach ($jobData as $data) {
-                        if ($data['name'] == $popJob) {
+                        if ($data['name'] == $pop->job) {
                             $demand = json_decode($data['demand'], true);
                             $supply = json_decode($data['supply'], true);
                             foreach ($demand as $goods => $value4) {
@@ -139,24 +141,45 @@ class PlanetController extends Controller {
                             }
                         }
                     }
+                    foreach ($country->species as $specie) {
+                        if ($specie['name'] == $pop->species && $specie['right'] == 0) {
+                            $needs = json_decode(Species::where(["name"=>$pop->species])->first()->needs,true);
+                            foreach ($needs['low'] as $goods => $num) {
+                                $this->districts[$key]['product'][$goods] -= $value;
+                            }
+                        }
+                    }
                 }
             }
             $cash0 = $this->districts[$key]['cash'];
+            if ($this->districts[$key]['cash'] <= -100) {
+                foreach($this->districts[$key]['jobs']['lowJob'] as $p) {
+                    $pop = Population::where(["id"=>$p])->first();
+                    foreach ($country->species as $specie) {
+                        if ($specie['name'] == $pop->species && $specie['right'] == 0) {
+                            $p->update(["job" => "无","class"=>"low","workat" => "无"]);
+                            $this->districts[$key]['cash'] += 500;
+                            break;
+                        }
+                    }
+                }
+            }
             if ($this->districts[$key]['cash'] <= -500) {
                 if ($this->districts[$key]['size'] < 2) {
                     $this->districts[$key]['size'] = 0;
                     foreach ($this->districts[$key]['jobs'] as $key2 => $value2) {
                         foreach ($value2 as $key3 => $value3) {
-                            Population::where(["id" => $value])->update(["job" => "无","class"=>"low","workat" => "无"]);
+                            Population::where(["id" => $value3])->update(["job" => "无","class"=>"low","workat" => "无"]);
                         }
                     }
                 }
                 else {
                     $this->districts[$key]['size'] -= 1;
+                    $this->districts[$key]['cash'] += $disData->buildCost;
                 }
             }
             else {
-                if ($result->economyType == 1) {
+                if ($country->economyType == 1) {
                     continue;
                 }
                 foreach ($this->districts[$key]['product'] as $key2 => $value2) {
@@ -187,6 +210,11 @@ class PlanetController extends Controller {
                                 Population::where(["id" => $value3])->update(["cash" => $cash]);
                             }
                         } else {
+                            foreach ($country->species as $specie) {
+                                if ($specie['name'] == $pop->species && $specie['right'] == 0) {
+                                    continue 2;
+                                }
+                            }
                             $this->product['country']['energy'] -= 1 * count($this->districts[$key]['jobs']['upJob']);
                             foreach ($value2 as $key3 => $value3) {
                                 $cash = Population::where(["id" => $value3])->first()->cash;
@@ -228,6 +256,11 @@ class PlanetController extends Controller {
                                 }
                             }
                         } else {
+                            foreach ($country->species as $specie) {
+                                if ($specie['name'] == $pop->species && $specie['right'] == 0) {
+                                    continue 2;
+                                }
+                            }
                             if ($this->districts[$key]['cash'] - $cash0 < 0) {
                                 $this->districts[$key]['cash'] -= 0.4 * $market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['lowJob']);
                                 foreach ($value2 as $key3 => $value3) {

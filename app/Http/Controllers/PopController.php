@@ -26,6 +26,20 @@ class PopController extends Controller {
     }
     //自动寻找工作//
     function findJob() {
+        $country = Country::get()->toArray();
+        foreach ($country as $key => $value) {
+            $country[$key]['planets'] = json_decode($value['planets']);
+            if (in_array($this->position,$country[$key]['planets'])) {
+                $species = json_decode($value['species'],true);
+                foreach ($species as $specie) {
+                    if ($specie['name'] == $this->species) {
+                        $right = $specie['right'];
+                    }
+                    $nationality = $country[$key]['tag'];
+                    break;
+                }
+            }
+        }
         if ($this->job == '无' || $this->workat == '无') {
             $p = Planet::where(["id" => $this->position])->first();
             $p->districts = json_decode($p->districts, true);
@@ -37,7 +51,7 @@ class PopController extends Controller {
                     foreach ($d->job['upJob'] as $key2 => $value2) {
                         $upJob += $value2;
                     }
-                    if (count($value['jobs']['upJob']) < $value['size'] * $upJob) {
+                    if (count($value['jobs']['upJob']) < $value['size'] * $upJob && $right > 0.67) {
                         if ($value['ownership' == 2]) {
                             continue;
                         }
@@ -55,7 +69,7 @@ class PopController extends Controller {
                 foreach ($d->job['midJob'] as $key2 => $value2) {
                     $midJob += $value2;
                 }
-                if (count($value['jobs']['midJob']) < $value['size'] * $midJob) {
+                if (count($value['jobs']['midJob']) < $value['size'] * $midJob && $right>0.33) {
                     foreach ($d->job['midJob'] as $job => $number) {
                         $this->job = $job;
                         break;
@@ -70,6 +84,9 @@ class PopController extends Controller {
                     $lowJob += $value2;
                 }
                 if (count($value['jobs']['lowJob']) < $value['size'] * $lowJob) {
+                    if ($right == 0) {
+                        $p->districts[$key] -= 500;
+                    }
                     foreach ($d->job['lowJob'] as $job => $number) {
                         $this->job = $job;
                         break;
@@ -114,7 +131,7 @@ class PopController extends Controller {
                     }
                 }
                 $midJob = 0;
-                foreach ($d->job['midJob'] as $key2 => $value2) {
+                 foreach ($d->job['midJob'] as $key2 => $value2) {
                     $midJob += $value2;
                 }
                 if (round($value['size']) * count($value['jobs']['midJob']) < $midJob && $this->job != 'up') {
