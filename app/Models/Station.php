@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-class Station extends Models {
+use Illuminate\Database\Eloquent\Model;
+
+class Station extends Model {
     protected $fillable = [
         'position','name','type','owner','controller','modules','yardCapacity',
         'isTradeHub','buildings',

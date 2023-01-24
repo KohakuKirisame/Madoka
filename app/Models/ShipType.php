@@ -8,4 +8,5 @@ class ShipType extends Model {
         'baseHull','baseEvasion','baseSpeed','baseEDamage','basePDamage','baseArmor','baseShield','disengageChance',
         'created_at','updated_at'
     ];
+
 }

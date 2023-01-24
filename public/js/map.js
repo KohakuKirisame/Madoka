@@ -17,7 +17,7 @@ function newPlanet(id,type) {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
-    $.post('/Action/newPlaner',{
+    $.post('/Action/newPlanet',{
         id : id,
         type : type,
     },function() {

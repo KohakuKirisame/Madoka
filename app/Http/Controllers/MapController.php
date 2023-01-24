@@ -28,6 +28,18 @@ class MapController extends Controller {
         }
     }
 
+    public function mapPage(Request $request){
+        $uid=$request->session()->get("uid");
+        if(User::where("uid",$uid)->exists()) {
+            $privilege = User::where("uid", $uid)->first()->privilege;
+            if (!is_null($privilege)) {
+                return view("mappage");
+            }
+        }else {
+            return redirect("https://kanade.nbmun.cn");
+        }
+    }
+
     public function changeOwner(Request $request){
         $uid = $request->session()->get('uid');
         if(User::where("uid",$uid)->exists()) {

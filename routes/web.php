@@ -32,6 +32,9 @@ Route::get('/Login',function () {
     }
 });
 
+Route::get('/Map',[MapController::class,"mapPage"])->middleware("isAuthedByReimu");
+Route::get("/MapContent",[MapController::class,"getData"])->middleware("isAuthedByReimu");
+
 Route::prefix("Action")->group(function (){
     Route::get("/Login",[UserController::class,"Auth"]);
     Route::get("/Logout",[UserController::class,"LogOut"]);
@@ -39,4 +42,4 @@ Route::prefix("Action")->group(function (){
     Route::post("/newPlanet",[MapController::class,"newPlanet"])->middleware("isAuthedByReimu");
 });
 
-Route::get('/Map',[MapController::class,"getData"])->middleware("isAuthedByReimu");
+
