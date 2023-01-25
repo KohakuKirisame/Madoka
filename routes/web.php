@@ -44,6 +44,7 @@ Route::prefix("Action")->group(function (){
     Route::get("/Logout",[UserController::class,"LogOut"]);
     Route::post("/ChangeOwner",[MapController::class,"changeOwner"])->middleware("isAuthedByReimu");
     Route::post("/newPlanet",[MapController::class,"newPlanet"])->middleware("isAuthedByReimu");
+    Route::post("/adminNewPop",[PlanetsController::class,"adminNewPop"])->middleware("isAuthedByReimu");
 });
 
 

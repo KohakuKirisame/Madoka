@@ -119,27 +119,45 @@ class PlanetController extends Controller {
                 }
                 foreach ($value['jobs'] as $key2 => $value2) {
                     if ($key2 == 'upJob') {
-                        $this->product['country']['energy'] -= 2 * $market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
+                        $this->product['country']['energy'] -= 2 * 2.5*$market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
                         foreach ($value2 as $key3 => $value3) {
-                            $cash = Population::where(["id" => $value3])->first()->cash;
-                            $cash += 2 * $market->goods['consume_goods']['price'];
-                            $cash -= $upTax * 2 * $market->goods['consume_goods']['price'];
+                            $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                            $cash += 2 * 2.5*2.5*$market->goods['consume_goods']['price'];
+                            $cash -= $upTax * 2 * 2.5*$market->goods['consume_goods']['price'];
                             Population::where(["id" => $value3])->update("cash", $cash);
                         }
                     } elseif ($key2 == 'midJob') {
                         $this->product['country']['energy'] -= 1.5 * count($this->districts[$key]['jobs']['midJob']);
                         foreach ($value2 as $key3 => $value3) {
-                            $cash = Population::where(["id" => $value3])->first()->cash;
-                            $cash += 1.5 * $market->goods['consume_goods']['price'];
-                            $cash -= $midTax * 1.5 * $market->goods['consume_goods']['price'];
+                            $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                            $cash += 1.5 * 2.5*$market->goods['consume_goods']['price'];
+                            $cash -= $midTax * 1.5 * 2.5*$market->goods['consume_goods']['price'];
                             Population::where(["id" => $value3])->update("cash", $cash);
                         }
                     } else {
                         $this->product['country']['energy'] -= 1 * count($this->districts[$key]['jobs']['upJob']);
                         foreach ($value2 as $key3 => $value3) {
-                            $cash = Population::where(["id" => $value3])->first()->cash;
-                            $cash += 1 * $market->goods['consume_goods']['price'];
-                            $cash -= $lowTax * 1 * $market->goods['consume_goods']['price'];
+                            $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                            $cash += 1 * 2.5*$market->goods['consume_goods']['price'];
+                            $cash -= $lowTax * 1 * 2.5*$market->goods['consume_goods']['price'];
                             Population::where(["id" => $value3])->update("cash", $cash);
                         }
                     }
@@ -216,10 +234,16 @@ class PlanetController extends Controller {
                 foreach ($this->districts[$key]['jobs'] as $key2 => $value2) {
                     if ($value['ownership'] == 3) {
                         if ($key2 == 'upJob') {
-                            $this->product['country']['energy'] -= 2 * $market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
+                            $this->product['country']['energy'] -= 2 * 2.5*$market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
                             foreach ($value2 as $key3 => $value3) {
-                                $cash = Population::where(["id" => $value3])->first()->cash;
-                                $salary = 2 * $market->goods['consume_goods']['price'];
+                                $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                                $salary = 2 * 2.5*$market->goods['consume_goods']['price'];
                                 $cash += (1 - $upTax) * $salary;
                                 $this->product['country']['energy'] += $upTax * $salary;
                                 Population::where(["id" => $value3])->update(["cash" => $cash]);
@@ -227,8 +251,14 @@ class PlanetController extends Controller {
                         } elseif ($key2 == 'midJob') {
                             $this->product['country']['energy'] -= 1.5 * count($this->districts[$key]['jobs']['midJob']);
                             foreach ($value2 as $key3 => $value3) {
-                                $cash = Population::where(["id" => $value3])->first()->cash;
-                                $salary = 1.5 * $market->goods['consume_goods']['price'];
+                                $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                                $salary = 1.5 * 2.5*$market->goods['consume_goods']['price'];
                                 $cash += (1 - $midTax) * $salary;
                                 $this->product['country']['energy'] += $upTax * $salary;
                                 Population::where(["id" => $value3])->update(["cash" => $cash]);
@@ -241,8 +271,14 @@ class PlanetController extends Controller {
                             }
                             $this->product['country']['energy'] -= 1 * count($this->districts[$key]['jobs']['upJob']);
                             foreach ($value2 as $key3 => $value3) {
-                                $cash = Population::where(["id" => $value3])->first()->cash;
-                                $salary = 1 * $market->goods['consume_goods']['price'];
+                                $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                                $salary = 1 * 2.5*$market->goods['consume_goods']['price'];
                                 $cash += (1 - $lowTax) * $salary;
                                 $this->product['country']['energy'] += $upTax * $salary;
                                 Population::where(["id" => $value3])->update(["cash" => $cash]);
@@ -251,20 +287,32 @@ class PlanetController extends Controller {
                     }
                     else {
                         if ($key2 == 'upJob') {
-                            $this->districts[$key]['cash'] -= 2 * $market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
+                            $this->districts[$key]['cash'] -= 2 * 2.5*$market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
                             foreach ($value2 as $key3 => $value3) {
-                                $cash = Population::where(["id" => $value3])->first()->cash;
-                                $salary = 2 * $market->goods['consume_goods']['price'];
+                                $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                                $salary = 2 * 2.5*$market->goods['consume_goods']['price'];
                                 $cash += (1 - $upTax) * $salary;
                                 $this->product['country']['energy'] += $upTax * $salary;
                                 Population::where(["id" => $value3])->update(["cash" => $cash]);
                             }
                         } elseif ($key2 == 'midJob') {
                             if ($this->districts[$key]['cash'] - $cash0 < 0) {
-                                $this->districts[$key]['cash'] -= 1 * $market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
+                                $this->districts[$key]['cash'] -= 1 * 2.5*$market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
                                 foreach ($value2 as $key3 => $value3) {
-                                    $cash = Population::where(["id" => $value3])->first()->cash;
-                                    $salary = 1 * $market->goods['consume_goods']['price'];
+                                    $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                                    $salary = 1 * 2.5*$market->goods['consume_goods']['price'];
                                     $cash += (1 - $midTax) * $salary;
                                     $this->product['country']['energy'] += $upTax * $salary;
                                     Population::where(["id" => $value3])->update(["cash" => $cash]);
@@ -272,8 +320,14 @@ class PlanetController extends Controller {
                             } else {
                                 $this->districts[$key]['cash'] -= 1.5 * count($this->districts[$key]['jobs']['midJob']);
                                 foreach ($value2 as $key3 => $value3) {
-                                    $cash = Population::where(["id" => $value3])->first()->cash;
-                                    $salary = 1.5 * $market->goods['consume_goods']['price'];
+                                    $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                                    $salary = 1.5 * 2.5*$market->goods['consume_goods']['price'];
                                     $cash += (1 - $midTax) * $salary;
                                     $this->product['country']['energy'] += $upTax * $salary;
                                     Population::where(["id" => $value3])->update(["cash" => $cash]);
@@ -286,10 +340,16 @@ class PlanetController extends Controller {
                                 }
                             }
                             if ($this->districts[$key]['cash'] - $cash0 < 0) {
-                                $this->districts[$key]['cash'] -= 0.4 * $market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['lowJob']);
+                                $this->districts[$key]['cash'] -= 0.4 * 2.5*$market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['lowJob']);
                                 foreach ($value2 as $key3 => $value3) {
-                                    $cash = Population::where(["id" => $value3])->first()->cash;
-                                    $salary = 0.4 * $market->goods['consume_goods']['price'];
+                                    $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                                    $salary = 0.4 * 2.5*$market->goods['consume_goods']['price'];
                                     $cash += (1 - $lowTax) * $salary;
                                     $this->product['country']['energy'] += $upTax * $salary;
                                     Population::where(["id" => $value3])->update(["cash" => $cash]);
@@ -297,8 +357,14 @@ class PlanetController extends Controller {
                             } else {
                                 $this->districts[$key]['cash'] -= 1 * count($this->districts[$key]['jobs']['upJob']);
                                 foreach ($value2 as $key3 => $value3) {
-                                    $cash = Population::where(["id" => $value3])->first()->cash;
-                                    $salary = 1 * $market->goods['consume_goods']['price'];
+                                    $pop = Population::where(["id" => $value3])->first();
+                            $cash = $pop->cash;
+                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            if ($speciesType == 'robot') {
+                                $this->product['country']['energy'] -= 1;
+                                continue;
+                            }
+                                    $salary = 1 * 2.5*$market->goods['consume_goods']['price'];
                                     $cash += (1 - $lowTax) * $salary;
                                     $this->product['country']['energy'] += $upTax * $salary;
                                     Population::where(["id" => $value3])->update(["cash" => $cash]);
@@ -478,6 +544,35 @@ class PlanetController extends Controller {
         return view('planet',["user"=>$user,"privilege"=>$privilege,
                                 "planets"=>$planets]);
     }
-
-
+    public function adminNewPop(Request $request) {
+        $uid = $request->session()->get('uid');
+        $privilege=User::where('id',$uid)->first()->privilege;
+        $id = $request->input('id');
+        $species = $request->input("species");
+        if ($privilege != 2) {
+            $pid = 1;
+            $pops = Population::get()->toArray();
+            foreach ($pops as $pop) {
+                if ($pop['id'] > $pid) {
+                    $pid += 1;
+                }
+            }
+            $pop = new Population();
+            $pop->id = $pid;
+            $pop->species = $species;
+            $pop->position = $id;
+            $pop->job = '无';
+            $pop->class = 'low';
+            $pop->workat = '无';
+            $pop->ethic = '';
+            $pop->ig = '';
+            $pop->party = '';
+            $pop->cash = 20;
+            $pop->stuggle = 0;
+            $pop->save();
+            $pops = json_decode(Planet::where('id',$id)->first()->pops,true);
+            $pops[] = $pid*1;
+            Planet::where('id',$id)->update(["pops"=>json_encode($pops,JSON_UNESCAPED_UNICODE)]);
+        }
+    }
 }

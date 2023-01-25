@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
-use app\Models\Planet;
-use app\Models\Population;
+use App\Models\Planet;
+use App\Models\Population;
 use App\Models\Species;
 
 class PopController extends Controller {
