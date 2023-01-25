@@ -82,6 +82,17 @@
                 @if($type == 'sc_black_hole' || $type == 'sc_pulsar' || $type == 'sc_neutron_star')
                     <img src='{{asset("storage/img/".$type.".png")}}' width='27.5px' />
                 @endif
+                @if($stars[$i]['havePlanet'] == 1)
+                    @foreach($planets as $planet)
+                        @php
+                            if ($stars[$i]['id'] == $planet['position']) {
+                                $countryImg = $planet['controller'];
+                                break;
+                            }
+                        @endphp
+                    @endforeach
+                    <img src='storage/img/countrys/{{$countryImg}}.png' width='20px' />
+                @endif
             </button>
             <ul class='dropdown-menu' aria-labelledby='MenuLink-{{$stars[$i]['id']}}' id='star-{{$stars[$i]['id']}}'>
                 <li><a class='dropdown-item' onclick='changeOwner({{$stars[$i]['id']}},"")'>无</a></li>
