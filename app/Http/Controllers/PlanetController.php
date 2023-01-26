@@ -567,7 +567,7 @@ class PlanetController extends Controller {
         $privilege = $User->privilege;
         $country = $User->country;
         $user=UserController::GetInfo($uid);
-        if($country!=""){
+        if($country!="" && $privilege == 2){
             $planets = Planet::where("owner",$country)->paginate(10);
         }else{
             $planets = Planet::paginate(10);
