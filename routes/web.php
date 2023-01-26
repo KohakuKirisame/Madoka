@@ -43,8 +43,12 @@ Route::prefix("Action")->group(function (){
     Route::get("/Login",[UserController::class,"Auth"]);
     Route::get("/Logout",[UserController::class,"LogOut"]);
     Route::post("/ChangeOwner",[MapController::class,"changeOwner"])->middleware("isAuthedByReimu");
-    Route::post("/newPlanet",[MapController::class,"newPlanet"])->middleware("isAuthedByReimu");
-    Route::post("/adminNewPop",[PlanetsController::class,"adminNewPop"])->middleware("isAuthedByReimu");
+    Route::post("/NewPlanet",[MapController::class,"newPlanet"])->middleware("isAuthedByReimu");
+    Route::post("/AdminNewPop",[PlanetController::class,"adminNewPop"])->middleware("isAuthedByReimu");
+    Route::post("/ReadPlanet",[PlanetController::class,"readPlanet"])->middleware("isAuthedByReimu");
+    Route::post("/NewName",[PlanetController::class,"newName"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeSize",[PlanetController::class,"changeSize"])->middleware("isAuthedByReimu");
+    Route::post("/BuildDistrict",[PlanetController::class,"buildDistrict"])->middleware("isAuthedByReimu");
 });
 
 

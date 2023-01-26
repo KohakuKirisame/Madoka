@@ -439,6 +439,36 @@ class PlanetController extends Controller {
         $this->updatePlanet();
         Country::where(["tag" => $this->owner])->update(["cashPool" => $country->cashPool]);
     }
+    //区划建造//
+    public function buildDistrict(Request $request) {
+        $uid = $request->session()->get('uid');
+        $User =User::where('uid',$uid)->first();
+        $privilege = $User->privilege;
+        $id = $request->input('id');
+        $district = $request->input('district');
+        $cost = District::where(["name" => $district])->first()->baseCost;
+        $planet = Planet::where(["id" => $id])->first();
+        $owner = $planet->owner;
+        $energy = Country::where(["tag" => $owner])->first()->energy;
+        if ($energy < $cost+200 && $privilege == 2) {
+            return 0;
+        }
+        else {
+            if ($privilege == 2) {
+                $energy -= $cost + 200;
+            }
+            $planet->districts = json_decode($planet->districts, true);
+            foreach ($planet->districts as $key => $value) {
+                if ($district == $key && $value['ownership'] == 3) {
+                    $planet->districts[$key]['size'] += 1;
+                }
+                else {
+                    $planet->districts[] = [$district => ["size" => 1, "cash" => 200, "profit" => 0,
+                        "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []]]];
+                }
+            }
+        }
+    }
     //人口增长//
     function popGrowth() {
         $typeD = PlanetType::where(["name"=>$this->type])->first;
@@ -533,32 +563,32 @@ class PlanetController extends Controller {
 
     public function planetPage(Request $request){
         $uid = $request->session()->get('uid');
-        $privilege=User::where('id',$uid)->first()->privilege;
+        $User =User::where('uid',$uid)->first();
+        $privilege = $User->privilege;
+        $country = $User->country;
         $user=UserController::GetInfo($uid);
-        $planets = Planet::paginate(10);//->toArray();
+        if($country!=""){
+            $planets = Planet::where("owner",$country)->paginate(10);
+        }else{
+            $planets = Planet::paginate(10);
+        }
+        $species = Species::get()->toArray();
+        $districts = District::get()->toArray();
         foreach ($planets as $planet) {
             $planet['type'] = PlanetType::where('name',$planet['type'])->first()->localization;
             $planet['position'] = Star::where(["id"=>$planet['position']])->first()->name;
-            $planet['pops']=explode(",",$planet['pops']);
+            $planet['pops']=json_decode($planet['pops'],true);
         }
         return view('planet',["user"=>$user,"privilege"=>$privilege,
-                                "planets"=>$planets]);
+                                "planets"=>$planets,"species"=>$species,"districts"=>$districts]);
     }
     public function adminNewPop(Request $request) {
         $uid = $request->session()->get('uid');
-        $privilege=User::where('id',$uid)->first()->privilege;
+        $privilege=User::where('uid',$uid)->first()->privilege;
         $id = $request->input('id');
         $species = $request->input("species");
         if ($privilege != 2) {
-            $pid = 1;
-            $pops = Population::get()->toArray();
-            foreach ($pops as $pop) {
-                if ($pop['id'] > $pid) {
-                    $pid += 1;
-                }
-            }
             $pop = new Population();
-            $pop->id = $pid;
             $pop->species = $species;
             $pop->position = $id;
             $pop->job = '无';
@@ -568,11 +598,35 @@ class PlanetController extends Controller {
             $pop->ig = '';
             $pop->party = '';
             $pop->cash = 20;
-            $pop->stuggle = 0;
+            $pop->struggle = 0;
             $pop->save();
             $pops = json_decode(Planet::where('id',$id)->first()->pops,true);
-            $pops[] = $pid*1;
+            $pops[] = $pop->id;
             Planet::where('id',$id)->update(["pops"=>json_encode($pops,JSON_UNESCAPED_UNICODE)]);
         }
+    }
+    public function readPlanet(Request $request) {
+        $id = $request->input('id');
+        $planet = Planet::where('id',$id)->first()->toArray();
+        $planet['districts'] = json_decode($planet['districts'],true);
+        $planet['product'] = json_decode($planet['product'],true);
+        $output=["name"=>$planet["name"],"districts"=>$planet['districts'],"product"=>$planet['product']];
+        $output = json_encode($output,JSON_UNESCAPED_UNICODE);
+        return $output;
+        //Here's to the crazy ones.
+    }
+    public function changeSize(Request $request) {
+        $uid = $request->session()->get('uid');
+        $privilege=User::where('uid',$uid)->first()->privilege;
+        $id = $request->input('id');
+        $size = $request->input("size");
+        if ($privilege == 0 || $privilege == 1) {
+            Planet::where('id',$id)->update(["size" => $size]);
+        }
+    }
+    public function newName(Request $request) {
+        $id = $request->input('id');
+        $name = $request->input("name");
+        Planet::where('id', $id)->update(["name"=>$name]);
     }
 }

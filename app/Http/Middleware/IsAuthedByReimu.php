@@ -10,6 +10,7 @@ class IsAuthedByReimu {
     public function handle(Request $request, Closure $next){
 
         if(!$request->session()->exists("uid")||$request->session()->get("valid")<time()){
+            $request->session()->flush();
             return redirect("/Login");
         }
 

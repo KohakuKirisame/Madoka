@@ -47,7 +47,7 @@
                     <a class="nav-link dropdown-toggle text-white px-3 py-3" href="#" id="user" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{$user["name"]}}</a>
                     <ul class="dropdown-menu" aria-labelledby="user">
                         <li><a class="dropdown-item" href="{{$_ENV["REIMU_URL"]}}">个人资料</a></li>
-                        <li><a class="dropdown-item" href="/Actions/LogOut">登出</a></li>
+                        <li><a class="dropdown-item" href="/Action/Logout">登出</a></li>
                     </ul>
                 </li>
                 <img src="{{$_ENV["REIMU_URL"]}}/storage/avatar/{{$user["avatar"]}}" class="rounded-circle" style="height: 48px" />

@@ -54,12 +54,12 @@
                 @if($stars[$i]['havePlanet'] == 1)
                     @foreach($planets as $planet)
                         @php
-                        if ($stars[$i]['id'] == $planet['position']) {
-                            $img = $planet['type'];
-                        }
+                            if ($stars[$i]['id'] == $planet['position']) {
+                                $img = $planet['type'];
+                            }
                         @endphp
                     @endforeach
-                    <img src='storage/img/planets/{{$img}}.png' width='20px' />
+                    <img src='storage/img/planets/{{$img}}.png' width='20px'>
                 @endif
             </button>
             <ul class='dropdown-menu' aria-labelledby='PlanerMenuLink-{{$stars[$i]['id']}}' id='star-Planet-{{$stars[$i]['id']}}'>
@@ -83,15 +83,19 @@
                     <img src='{{asset("storage/img/".$type.".png")}}' width='27.5px' />
                 @endif
                 @if($stars[$i]['havePlanet'] == 1)
-                    @foreach($planets as $planet)
-                        @php
-                            if ($stars[$i]['id'] == $planet['position']) {
+                    @php
+                        $ownered = False;
+                        foreach ($planets as $planet) {
+							if ($stars[$i]['id'] == $planet['position'] && $planet['controller'] != '') {
+                                $ownered = true;
                                 $countryImg = $planet['controller'];
                                 break;
-                            }
-                        @endphp
-                    @endforeach
-                    <img src='storage/img/countrys/{{$countryImg}}.png' width='20px' />
+							}
+                        }
+                    @endphp
+                    @if ($ownered)
+                        <img src='storage/img/countries/{{$countryImg}}.png' width='27.5px' />
+                    @endif
                 @endif
             </button>
             <ul class='dropdown-menu' aria-labelledby='MenuLink-{{$stars[$i]['id']}}' id='star-{{$stars[$i]['id']}}'>
@@ -113,14 +117,21 @@
                     id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
                     data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
                 @if($stars[$i]['havePlanet'] == 1)
-                    @foreach($planets as $planet)
-                        @php
+                    @php
+                        $ownered = False;
+                        foreach($planets as $planet) {
                             if ($stars[$i]['id'] == $planet['position']) {
                                 $img = $planet['type'];
+                                if ($planet['controller'] != '') {
+                                    $ownered = true;
+                                }
+								break;
                             }
-                        @endphp
-                    @endforeach
-                    <img src='storage/img/planets/{{$img}}.png' width='20px'>
+						}
+                    @endphp
+                    @if(!$ownered)
+                        <img src='storage/img/planets/{{$img}}.png' width='20px' />
+                    @endif
                 @endif
             </button>
             <button type='button' class='btn btn-default'
@@ -139,6 +150,21 @@
                               data-bs-content='当前受控于{{$countryName}}'>
                 @if($type == 'sc_black_hole' || $type == 'sc_pulsar' || $type == 'sc_neutron_star')
                     <img src='{{asset("storage/img/".$type.".png")}}' width='27.5px' />
+                @endif
+                @if($stars[$i]['havePlanet'] == 1)
+                    @php
+                        $ownered = False;
+                        foreach ($planets as $planet) {
+                            if ($stars[$i]['id'] == $planet['position'] && $planet['controller'] != '') {
+                                $ownered = true;
+                                $countryImg = $planet['controller'];
+                                break;
+                            }
+                        }
+                    @endphp
+                    @if ($ownered)
+                        <img src='storage/img/countries/{{$countryImg}}.png' width='27.5px' />
+                    @endif
                 @endif
             </button>
         @endif
