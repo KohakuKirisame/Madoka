@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Session;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect("/Dashboard");
 });
 
 Route::get('/Dashboard',[UserController::class,"ShowDashboard"])->middleware("isAuthedByReimu");

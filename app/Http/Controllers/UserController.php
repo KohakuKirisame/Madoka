@@ -32,7 +32,7 @@ class UserController extends Controller {
 
     public function LogOut(Request $request){
         $request->session()->flush();
-        return redirect("/");
+        return redirect("/Dashboard");
     }
 
     static public function IsAuthed(Request $request){
@@ -65,6 +65,7 @@ class UserController extends Controller {
         $context=stream_context_create($options);
         $result=file_get_contents($_ENV["REIMU_URL"]."/includes/query.php", false, $context);
         $result=json_decode($result,associative: true);
+
         return $result;
     }
 
@@ -76,6 +77,9 @@ class UserController extends Controller {
             return redirect("https://kanade.nbmun.cn");
         }
         $user=$this->GetInfo($uid);
+        if (key_exists("Err",$user)){
+            return redirect("/Action/Logout");
+        }
         return view("dashboard",["privilege"=>$privilege,"user"=>$user]);
     }
 }

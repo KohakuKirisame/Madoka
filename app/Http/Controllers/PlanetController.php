@@ -567,6 +567,9 @@ class PlanetController extends Controller {
         $privilege = $User->privilege;
         $country = $User->country;
         $user=UserController::GetInfo($uid);
+        if (key_exists("Err",$user)){
+            return redirect("/Action/Logout");
+        }
         if($country!="" && $privilege == 2){
             $planets = Planet::where("owner",$country)->paginate(10);
         }else{

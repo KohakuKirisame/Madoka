@@ -37,6 +37,9 @@ class MapController extends Controller {
             $privilege = User::where("uid", $uid)->first()->privilege;
             if (!is_null($privilege)) {
                 $user=UserController::GetInfo($uid);
+                if (key_exists("Err",$user)){
+                    return redirect("/Action/Logout");
+                }
                 return view("mappage",["user"=>$user]);
             }
         }else {
