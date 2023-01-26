@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Country;
 use App\Models\Definition;
 use App\Models\Fleet;
-use app\Models\Ship;
+use App\Models\Ship;
 use App\Models\ShipComputer;
+use App\Models\ShipType;
+use App\Models\Star;
+use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class WarController extends Controller{
+class MilitaryController extends Controller{
 
     public function spaceBattle() {
         $fleets = func_get_args();
@@ -100,7 +104,7 @@ class WarController extends Controller{
             foreach ($dataArr as $key => $value) {
                 $damageBuffer[$key] = array();
                 foreach ($value as $key2 => $value2) {
-                    if ($dataArr[$key][$key2]['computer'] == 'A' && $dataArr[$key][$key2]['hull'] < 0.2 * $dataArr[$key][$key2]['fullHull']) {
+                    if ($dataArr[$key][$key2]['computer'] == 1 && $dataArr[$key][$key2]['hull'] < 0.2 * $dataArr[$key][$key2]['fullHull']) {
                         $dataArr[$key][$key2]['hull'] = 0;
                         array_push($damageBuffer[$key], array('PDamage' => $dataArr[$key][$key2]['PDamage'] * 2,
                             'EDamage' => $dataArr[$key][$key2]['EDamage'],
@@ -308,6 +312,251 @@ class WarController extends Controller{
                     }
                 }
             }
+        }
+    }
+    public function fleetCount($id){
+        $fleet = Fleet::where(["id" => $id])->first()->toArray();
+        $fleet['ships'] = json_decode($fleet['ships'],true);
+        $hull = $PDamage = $EDamage = $shield = $armor = $evasion = $speed = $commandPoints = $disengageChance = 0;
+        foreach ($fleet['ships'] as $key => $value) {
+            $shipType = Ship::where(["id" => $value])->first()->shipType;
+            $data = ShipType::where(["type" => $shipType])->first()->toArray();
+            $commandPoints += $data['commandPoints'];
+            $hull += $data['baseHull'];
+            $PDamage += $data['basePDamage'];
+            $EDamage += $data['baseEDamage'];
+            $shield += $data['baseShield'];
+            $armor += $data['baseArmor'];
+            $evasion += $data['baseEvasion']*$data['commandPoints'];
+            $speed += $data['baseSpeed']*$data['commandPoints'];
+            $disengageChance += $data['disengageChance']*$data['commandPoints'];
+        }
+        $evasion = $evasion/$commandPoints;
+        $speed = $speed/$commandPoints;
+        $disengageChance = $disengageChance/$commandPoints;
+
+        $weaponArr = array($fleet['weaponA'],$fleet['weaponB']);
+        $weapon1 = $weapon2 = 0;
+        foreach ($weaponArr as $key => $value) {
+            if ($value == 1) {
+                $weapon1 += 1;
+            }
+            else {
+                $weapon2 += 1;
+            }
+        }
+        $EDamage *= $weapon1;
+        $armor *= 1+($weapon1*0.1);
+        $PDamage *= $weapon2;
+        $shield *= 1+($weapon2*0.1);
+        $owner = $fleet['owner'];
+        $data = Country::where(["tag" => $owner])->first()->toArray();
+        $hull *= 1+$data['shipHullModifier'];
+        $PDamage *= 1+$data['shipPDamageModifier'];
+        $EDamage *= 1+$data['shipEDamageModifier'];
+        $shield *= 1+$data['shipShieldModifier'];
+        $armor *= 1+$data['shipArmorModifier'];
+        $evasion *= 1+$data['shipEvasionModifier'];
+        $speed *= 1+$data['shipSpeedModifier'];
+        $disengageChance *=1+$data['shipDisengageChanceModifier'];
+
+        $fleet['hull'] = $hull;
+        $fleet['PDamage'] = $PDamage;
+        $fleet['EDamage'] = $EDamage;
+        $fleet['shield'] = $shield;
+        $fleet['armor'] = $armor;
+        $fleet['evasion'] = $evasion;
+        $fleet['speed'] = $speed;
+        $fleet['disengageChance'] = $disengageChance;
+        $id = $fleet['id'];
+        Fleet::where('id', $id)->update(["hull"=>$hull,"PDamage"=>$PDamage,"EDamage"=>$EDamage,
+            "shield"=>$shield,"armor"=>$armor,"evasion"=>$evasion,"speed"=>$speed,"disengageChance"=>$disengageChance]);
+    }
+
+    public function militaryPage(Request $request){
+        $uid = $request->session()->get('uid');
+        $user= UserController::GetInfo($uid);
+        if(key_exists('Err',$user)){
+            return redirect('/Action/Logout');
+        }
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        if ($privilege <= 1) {
+            $fleets = Fleet::get()->toArray();
+            $ftls = ["超空间引擎","曲率引擎"];
+        } elseif ($privilege == 2) {
+            $fleets = Fleet::where(["owner"=>$country])->get()->toArray();
+            $ftls = ["超空间引擎",];
+            $techs = json_decode(Country::where(["tag"=>$country])->first()->techs,true);
+            if (in_array("曲率引擎",$techs)) {
+                $ftls[] = "曲率引擎";
+            }
+        } else {
+            return redirect('/Dashboard');
+        }
+        foreach ($fleets as $key => $fleet) {
+            $fleet['computer'] = ShipComputer::where(["id"=>$fleet['computer']])->first()->localization;
+            $fleet['position'] = Star::where(["id"=>$fleet['position']])->first()->name;
+            $fleet['ships'] = json_decode($fleet['ships'], true);
+            $fleet['ships'] = count($fleet['ships']);
+            if ($fleet['ftl'] == 0) {
+                $fleet['ftl'] = '超空间引擎';
+            } elseif ($fleet['ftl'] == 1) {
+                $fleet['ftl'] = '曲率引擎';
+            }
+            if ($fleet['weaponA'] == 1) {
+                $fleet['weaponA'] = '能量武器';
+            } else {
+                $fleet['weaponA'] = '动能武器';
+            }
+            if ($fleet['weaponB'] == 1) {
+                $fleet['weaponB'] = '能量武器';
+            } else {
+                $fleet['weaponB'] = '动能武器';
+            }
+            $fleets[$key] = $fleet;
+        }
+        $computers = ShipComputer::get()->toArray();
+        $shipTypes = ShipType::get()->toArray();
+        return view('military', ['user' => $user,"privilege"=>$privilege,
+            'fleets'=>$fleets,"ftls"=>$ftls,"computers"=>$computers,"shipTypes"=>$shipTypes]);
+    }
+    public function readFleet(Request $request) {
+        $id = $request->input('id');
+        $fleet = Fleet::where(["id"=>$id])->first();
+        $ships = json_decode($fleet->ships, true);
+        $shipList = [];
+        foreach ($ships as $ship) {
+            $shipData = Ship::where(["id"=>$ship])->first();
+            $type = $shipData->shipType;
+            $name = ShipType::where(["type"=>$type])->first()->name;
+            $shipList[] = [$shipData->id,$shipData->name,$name];
+        }
+        $output = ["name"=>$fleet->name,"hull"=>$fleet->hull,"EDamage"=>$fleet->EDamage,"PDamage"=>$fleet->PDamage,
+                "armor"=>$fleet->armor,"shield"=>$fleet->shield,"evasion"=>$fleet->evasion,"speed"=>$fleet->speed,
+                "shipList"=>$shipList,"weaponA"=>$fleet->weaponA,"weaponB"=>$fleet->weaponB];
+        $output = json_encode($output);
+        return $output;
+    }
+    public function changeFleetName(Request $request) {
+        $id = $request->input('id');
+        $name = $request->input("name");
+        Fleet::where('id', $id)->update(["name"=>$name]);
+    }
+    public function changeShipName(Request $request) {
+        $id = $request->input('id');
+        $name = $request->input("name");
+        Ship::where('id', $id)->update(["name"=>$name]);
+    }
+    public function changeFleetComputer(Request $request) {
+        $id = $request->input('id');
+        $computer = $request->input("computer");
+        Fleet::where('id', $id)->update(["computer"=>$computer]);
+    }
+    public function changeFleetFTL(Request $request) {
+        $id = $request->input('id');
+        $ftl = $request->input("ftl");
+        if ($ftl == "超空间引擎") {
+            $ftl = 0;
+        } else {
+            $ftl = 1;
+        }
+        Fleet::where('id', $id)->update(["ftl"=>$ftl]);
+    }
+    public function adminNewShip(Request $request) {
+        $id = $request->input('id');
+        $type = $request->input('type');
+        $uid = $request->session()->get('uid');
+        $privilege = User::where(["uid"=>$uid])->first()->privilege;
+        $fleet = Fleet::where(["id"=>$id])->first();
+        if ($privilege <=1 ) {
+            $ship = new Ship();
+            $ship->name = $type;
+            $ship->owner = $fleet->owner;
+            $ship->shipType = $type;
+            $ship->save();
+            $ships = json_decode($fleet->ships,true);
+            $ships[] = $ship->id;
+            $ships = json_encode($ships,JSON_UNESCAPED_UNICODE);
+            Fleet::where('id',$id)->update(["ships"=>$ships]);
+        }
+        $this->fleetCount($id);
+    }
+    public function getFleets(Request $request) {
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        if ($privilege == 0) {
+            $fleets = Fleet::get()->toArray();
+        }
+        else {
+            $fleets = Fleet::where(["owner"=>$country])->get()->toArray();
+        }
+        $fleets = json_encode($fleets,JSON_UNESCAPED_UNICODE);
+        return $fleets;
+    }
+    public function fleetMerge(Request $request) {
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        $fleet1 = Fleet::where(["id"=>$request->input('id1')])->first()->toArray();
+        $fleet2 = Fleet::where(["id"=>$request->input('id2')])->first()->toArray();
+        if (($privilege == 2 && $fleet1['owner'] == $country && $fleet2['owner'] == $country) || $privilege <= 1) {
+            $fleet1['ships'] = json_decode($fleet1['ships'], true);
+            $fleet2['ships'] = json_decode($fleet2['ships'], true);
+            foreach ($fleet2['ships'] as $value) {
+                $fleet1['ships'][] = $value;
+            }
+            $this->fleetCount($fleet1['id']);
+            $fleet1['ships'] = json_encode($fleet1['ships'], JSON_UNESCAPED_UNICODE);
+            Fleet::where(["id"=>$fleet2['id']])->delete();
+            Fleet::where(["id"=>$fleet1['id']])->update(["ships"=>$fleet1['ships']]);
+        }
+    }
+    public function shipTrans(Request $request) {
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        $fleet1 = Fleet::where(["id"=>$request->input('f1')])->first()->toArray();
+        $fleet2 = Fleet::where(["id"=>$request->input('f2')])->first()->toArray();
+        $ship = $request->input('id');
+        if (($privilege == 2 && $fleet1['owner'] == $country && $fleet2['owner'] == $country) || $privilege <= 1) {
+            $fleet1['ships'] = json_decode($fleet1['ships'], true);
+            $fleet2['ships'] = json_decode($fleet2['ships'], true);
+            if (in_array($ship,$fleet1['ships'])) {
+                $fleet2['ships'][] = $ship;
+                foreach($fleet1['ships'] as $key => $value) {
+                    if ($ship == $value) {
+                        unset($fleet1['ships'][$key]);
+                        array_values($fleet1['ships']);
+                        break;
+                    }
+                }
+            }
+        }
+        $this->fleetCount($fleet1['id']);
+        $this->fleetCount($fleet2['id']);
+        $fleet1['ships'] = json_encode($fleet1['ships'], JSON_UNESCAPED_UNICODE);
+        $fleet2['ships'] = json_encode($fleet2['ships'], JSON_UNESCAPED_UNICODE);
+        Fleet::where(["id"=>$fleet1['id']])->update(["ships"=>$fleet1['ships']]);
+        Fleet::where(["id"=>$fleet2['id']])->update(["ships"=>$fleet2['ships']]);
+    }
+    public function fleetDelete(Request $request) {
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        $fleet1 = Fleet::where(["id"=>$request->input('id')])->first()->toArray();
+        if (($privilege == 2 && $fleet1['owner'] == $country) || $privilege <= 1) {
+            $fleet1['ships'] = json_decode($fleet1['ships'], true);
+            foreach ($fleet1['ships'] as $ship) {
+                Ship::where(["id"=>$ship])->delete();
+            }
+            Fleet::where(["id"=>$fleet1['id']])->delete();
         }
     }
 }

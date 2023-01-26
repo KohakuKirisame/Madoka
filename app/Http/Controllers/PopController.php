@@ -185,7 +185,7 @@ class PopController extends Controller {
                 break;
             }
         }
-        $line = 6*$m->goods['consume_goods']['prive'];
+        $line = 6*$m->goods['consume_goods']['price'];
         if ($this->cash >= $line) {
             $cashPool = Country::where(["tag"=>$countryKey])->first()->cashPool;
             $cashPool += 0.5*($this->cash - $line);

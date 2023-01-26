@@ -185,7 +185,7 @@ return [
         /*
          * Package Service Providers...
          */
-
+        LaravelChen\Editormd\EditorMdProvider::class,
         /*
          * Application Service Providers...
          */

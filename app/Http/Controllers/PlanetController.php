@@ -237,12 +237,12 @@ class PlanetController extends Controller {
                             $this->product['country']['energy'] -= 2 * 2.5*$market->goods['consume_goods']['price'] * count($this->districts[$key]['jobs']['upJob']);
                             foreach ($value2 as $key3 => $value3) {
                                 $pop = Population::where(["id" => $value3])->first();
-                            $cash = $pop->cash;
-                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
-                            if ($speciesType == 'robot') {
-                                $this->product['country']['energy'] -= 1;
-                                continue;
-                            }
+                                $cash = $pop->cash;
+                                $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                                if ($speciesType == 'robot') {
+                                    $this->product['country']['energy'] -= 1;
+                                    continue;
+                                }
                                 $salary = 2 * 2.5*$market->goods['consume_goods']['price'];
                                 $cash += (1 - $upTax) * $salary;
                                 $this->product['country']['energy'] += $upTax * $salary;
@@ -457,21 +457,30 @@ class PlanetController extends Controller {
             if ($privilege == 2) {
                 $energy -= $cost + 200;
             }
-            $planet->districts = json_decode($planet->districts, true);
-            foreach ($planet->districts as $key => $value) {
-                if ($district == $key && $value['ownership'] == 3) {
-                    $planet->districts[$key]['size'] += 1;
-                }
-                else {
-                    $planet->districts[] = [$district => ["size" => 1, "cash" => 200, "profit" => 0,
-                        "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []]]];
+            $districts = json_decode($planet->districts, true);
+            $isExisted = false;
+            foreach ($districts as $key => $value) {
+                if ($district == $value['name'] && $value['ownership'] == 3) {
+                    $districts[$key]['size'] += 1;
+                    $districts[$key]['cash'] += 200;
+                    $isExisted = true;
+                    break;
                 }
             }
+            if (!$isExisted) {
+                $districts[] = ["name" => $district, "size" => 1, "cash" => 200, "ownership" => 3, "profit" => 0,
+                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []]];
+            }
+
+
         }
+        $planet->districts = json_encode($districts,JSON_UNESCAPED_UNICODE);
+        $planet->save();
+//        Planet::where(["id" => $id])->update(["districts" => $planet->districts]);
     }
     //人口增长//
     function popGrowth() {
-        $typeD = PlanetType::where(["name"=>$this->type])->first;
+        $typeD = PlanetType::where(["name"=>$this->type])->first();
         $carryAble = $typeD->carryAble * $this->size;
         $growth = 0;
         if ($carryAble > 2*count($this->pops)) {
@@ -573,7 +582,7 @@ class PlanetController extends Controller {
         if($country!="" && $privilege == 2){
             $planets = Planet::where("owner",$country)->paginate(10);
         }else{
-            $planets = Planet::paginate(10);
+            $planets = Planet::paginate(16);
         }
         $species = Species::get()->toArray();
         $districts = District::get()->toArray();
@@ -590,7 +599,7 @@ class PlanetController extends Controller {
         $privilege=User::where('uid',$uid)->first()->privilege;
         $id = $request->input('id');
         $species = $request->input("species");
-        if ($privilege != 2) {
+        if ($privilege <=1) {
             $pop = new Population();
             $pop->species = $species;
             $pop->position = $id;
@@ -627,7 +636,7 @@ class PlanetController extends Controller {
             Planet::where('id',$id)->update(["size" => $size]);
         }
     }
-    public function newName(Request $request) {
+    public function changePlanetName(Request $request) {
         $id = $request->input('id');
         $name = $request->input("name");
         Planet::where('id', $id)->update(["name"=>$name]);

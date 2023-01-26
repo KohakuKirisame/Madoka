@@ -12,14 +12,14 @@ function adminNewPop(species) {
         $('#planetPop-'+nowControlling).html(Number($('#planetPop-'+nowControlling).html())+1);
     })
 }
-function newName(id) {
+function changePlanetName(id) {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
     name=$("#planetName-"+id).val();
-    $.post('/Action/NewName',{
+    $.post('/Action/ChangePlanetName',{
         id : id,
         name : name,
     },function() {});
@@ -56,6 +56,7 @@ function readPlanet(id,privilege){
     $.post('/Action/ReadPlanet',{
         id : id,
     },function(data) {
+        nowControlling=id;
         data=JSON.parse(data);
         console.log(data);
         $("#planetName").html(data['name']);
@@ -80,7 +81,7 @@ function readPlanet(id,privilege){
             }
             $("#districtsList").append("<li class=\"list-group-item\">\n" +
         "                                <div class=\"row\">\n" +
-        "                                    <p class=\"col-3 text-center\">"+key+"</p>\n" +
+        "                                    <p class=\"col-3 text-center\">"+data['districts'][key]['name']+"</p>\n" +
         "                                    <p class=\"col-2 text-center\">"+data['districts'][key]['size']+"</p>\n" +
         "                                    <p class=\"col-2 text-center\">"+data['districts'][key]['ownership']+"</p>\n" +
         "                                    <p class=\"col-3 text-center\">"+Math.round(data['districts'][key]['cash'])+"</p>\n" +
@@ -107,7 +108,6 @@ function readPlanet(id,privilege){
         $("#adminButton").empty();
         if (privilege == 0 || privilege == 1) {
             $("#adminButton").append("<button type=\"button\" class=\"btn btn-primary\" data-bs-target=\"#newPopModal\" data-bs-toggle=\"modal\" data-bs-dismiss=\"modal\">新建人口</button>");
-            nowControlling=id;
         }
     });
     const planetModal = new bootstrap.Modal("#planetModal");

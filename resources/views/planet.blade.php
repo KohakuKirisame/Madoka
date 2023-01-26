@@ -26,9 +26,13 @@
         @foreach($planets as $planet)
         <li class="list-group-item">
             <div class="row">
+                @if($privilege==3)
+                    <p class="col-2 text-center">{{$planet['name']}}</p>
+                @else
                 <div class="col-2">
-                    <input type="text" class="form-control" id="planetName-{{$planet['id']}}" value="{{$planet['name']}}" onchange="newName({{$planet['id']}})"/>
+                    <input type="text" class="form-control" id="planetName-{{$planet['id']}}" value="{{$planet['name']}}" onchange="changePlanetName({{$planet['id']}})"/>
                 </div>
+                @endif
                 <p class="col-2 text-center">{{$planet['position']}}</p>
                 <p class="col-2 text-center">{{$planet['type']}}</p>
                 @if ($privilege == 0 || $privilege == 1)
@@ -81,31 +85,35 @@
             </div>
             <div class="modal-footer">
                 <div id="adminButton"></div>
-                <button type="button" class="btn btn-primary" data-bs-target="#newDistrictModal" data-bs-toggle="modal" data-bs-dismiss="modal">新建区划</button>
+                @if($privilege != 3)
+                    <button type="button" class="btn btn-primary" data-bs-target="#newDistrictModal" data-bs-toggle="modal" data-bs-dismiss="modal">新建区划</button>
+                @endif
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="newDistrictModal" tabindex="-1" aria-labelledby="newDistrictModalModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">新建区划</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @foreach($districts as $district)
-                    <button type="button" class="btn btn-light" onclick="buildDistrict('{{$district['name']}}')">{{$district['name']}}</button>
-                @endforeach
-            </div>
-            <div class="modal-footer">
-                <div id="adminButton"></div>
-                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" href="#planetModel">返回</button>
+@if($privilege != 3)
+    <div class="modal fade" id="newDistrictModal" tabindex="-1" aria-labelledby="newDistrictModalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新建区划</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @foreach($districts as $district)
+                        <button type="button" class="btn btn-light" onclick="buildDistrict('{{$district['name']}}')">{{$district['name']}}</button>
+                    @endforeach
+                </div>
+                <div class="modal-footer">
+                    <div id="adminButton"></div>
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" href="#planetModel">返回</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+@endif
 @if($privilege == 0 || $privilege == 1)
     <div class="modal fade" id="newPopModal" tabindex="-1" aria-labelledby="newPopModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-sm">
