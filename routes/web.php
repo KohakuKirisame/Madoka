@@ -68,7 +68,7 @@ Route::prefix("Action")->group(function (){
     Route::post("/FleetDelete",[MilitaryController::class,"fleetDelete"])->middleware("isAuthedByReimu");
     Route::post("/ChangeArmyName",[MilitaryController::class,"changeArmyName"])->middleware("isAuthedByReimu");
     Route::post("/MoveArmy",[MilitaryController::class,"moveArmy"])->middleware("isAuthedByReimu");
-    Route::post("/ArmyDelete",[MilitaryController::class,"armyDelete"])->middleware("isAuthedByReimu");s
+    Route::post("/ArmyDelete",[MilitaryController::class,"armyDelete"])->middleware("isAuthedByReimu");
 });
 
 
