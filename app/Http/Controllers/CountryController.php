@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
-use app\Models\Tech;
+use App\Models\Definition;
+use App\Models\Planet;
+use App\Models\Tech;
 use App\Models\TechArea;
 use http\Env\Request;
 
@@ -49,27 +51,70 @@ class CountryController
         Country::where(["tag"=>$id])->update(["techList"=>json_decode($techList)]);
     }
     function techCount(){
-        $country = Country::where(["tag"=>$this->tag])->first();
-        $ethicsM = $country->ethicsM;
-        $ethicsAM = $country->ethicsAM;
-        $techs = json_decode($country->techs,true);
-        $techList = json_decode($country->techList,true);
+        $country = Country::where(["tag"=>$this->tag])->first()->toArray();
+        $ethicsM = $country['ethicsM'];
+        $ethicsAM = $country['ethicsAM'];
+        $techs = json_decode($country['techs'],true);
+        $techList = json_decode($country['techList'],true);
         foreach ($techList as $item) {
-            $process = random_int(10,100)*(1+($value2['allowance']/$value2['cost']));
+            $process = random_int(10,100)*(1+($item['allowance']/$item['cost']));
             $process *= 1+$ethicsM/400;
             $process *= 1-$ethicsAM/400;
             $item['process'] += $process;
             if ($item['process'] >= $item['cost']) {
-                unset($this->techList[$key]);
                 $modifierList = json_decode($country->ModifierList,true);
                 $techs[] = $item['name'];
                 $modifier = json_decode(Tech::where(["name"=>$item['name']])->first()->modifier,true);
                 $ModifierList[] = ["name"=>$item['name'],"modifier"=>$modifier];
-                $country->ModifierList = json_encode($modifierList,JSON_UNESCAPED_UNICODE);
+                $country['ModifierList'] = json_encode($ModifierList,JSON_UNESCAPED_UNICODE);
+                unset($item);
             }
         }
         $techs = json_encode($this->techs,JSON_UNESCAPED_UNICODE);
         $techList = json_encode($this->techList,JSON_UNESCAPED_UNICODE);
         Country::where(["tag"=>$this->tag])->update(["techList"=>$techList,"techs"=>$techs,"ModifierList"=>$country->ModifierList]);
+    }
+    function modifierCount() {
+        $country = Country::where(["tag"=>$this->tag])->first();
+        $ModifierList = json_decode($country->ModifierList, true);
+        $modifierIDs = Definition::get()->toArray();
+        foreach($modifierIDs as $modifier) {
+            if ($modifier['area'] == 'ethic') {
+                unset($modifier);
+                array_values($modifierIDs);
+            }
+        }
+        foreach ($modifierIDs as $modifier) {
+            $country->$modifier['name'] = 0;
+        }
+        foreach($country['ModifierList'] as $modifier)  {
+            foreach($modifier['modifier'] as $key => $value) {
+                $country->$key += $value;
+            }
+        }
+        $country->save();
+    }
+    public function mainFunction($id) {
+        $self = Planet::where(["owner"=>$id])->fitst();
+        $planets = json_decode($self->planets,true);
+        foreach($planets as $value) {
+            $planet = new PlanetController($value);
+            $planet->searchTradeHub();
+            $planet->districtCount();
+            $planet->investDistrict();
+            $planet->countRes();
+            $planet->popGrowth();
+            foreach ($planet['pops'] as $value2) {
+                $pop = new PopController($value2);
+                $pop->findJob();
+                $pop->getNeeds();
+                $pop->invest();
+            }
+        }
+        $market = new MarketController($id);
+        $market->countTrade();
+        $market->priceCount();
+        $this->techCount();
+        $this->modifierCount();
     }
 }

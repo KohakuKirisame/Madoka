@@ -18,6 +18,8 @@ class MilitaryController extends Controller{
 
     public function spaceBattle() {
         $fleets = func_get_args();
+        $position = Fleet::where(["id"=>$fleets[0]])->first()->position;
+        $starType = Star::where(["id"=>$position])->first()->type;
         $flags = array();
         foreach ($fleets as $key => $value) {
             $result = Fleet::where(["id" => $value])->get();  //$conn->query("SELECT owner FROM Fleet WHERE id='$value'");
@@ -65,7 +67,14 @@ class MilitaryController extends Controller{
                 $disengageChance = $data->disengageChance;
                 $computer = $data->computer;
                 //////
-
+                if ($starType == 'sc_pulsar') {
+                    $shield = 0;
+                } elseif ($starType == 'sc_neutron_star') {
+                    $evasion *=0.5;
+                    $speed *=0.5;
+                } elseif ($starType == 'sc_black_hole') {
+                    $disengageChance *= 0.5;
+                }
                 //////
                 array_push($dataArr[$key], array("hull" => $hull,
                     "fullHull" => $hull,

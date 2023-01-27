@@ -64,45 +64,60 @@ class MarketController extends Controller {
                 }
             }
         }
-        $ecoType = Country::where(["tag"=>$this->owner])->first()->economyType;
-        if ($ecoType == 0) {
-            foreach ($this->trades as $key => $value) {
-                if ($value['duration'] > 0) {
-                    foreach ($value['content'] as $key2 => $value2) {
-                        if ($value2 > 0 ) {
-                            $this->goods[$key2]['supplyOrder'] += $value2;
-                        }
-                        else {
-                            $this->goods[$key2]['demandOrder'] -= $value2;
-                        }
+        foreach ($this->trades as $key => $value) {
+            if ($value['duration'] > 0) {
+                foreach ($value['content'] as $key2 => $value2) {
+                    if ($value2 > 0 ) {
+                        $this->goods[$key2]['supplyOrder'] += $value2;
+                    }
+                    else {
+                        $this->goods[$key2]['demandOrder'] -= $value2;
                     }
                 }
             }
         }
-        foreach ($this->goods as $key => $value) {
-            $basePrice = Good::where(["name"=>$key])->first()->basePrice;
-            $DO = $this->goods[$key]['demandOrder'];
-            $SO = $this->goods[$key]['supplyOrder'];
-            if ($this->goods[$key]['storage'] > 0) {
-                $SO += $this->goods[$key]['storage'];
-            }
-            else {
-                $DO += $this->goods[$key]['storage'];
-            }
-            if ($DO == 0) {
-                $this->goods[$key]['price'] = 0.1*$basePrice;
-            }
-            elseif ($SO == 0) {
-                $this->goods[$key]['price'] = 5*$basePrice;
-            }
-            else {
-                $this->goods[$key]['price'] = $basePrice*(1+0.75 * (($DO - $SO)/min($SO,$DO)));
-                if ($this->goods[$key]['price'] > 5*$basePrice) {
-                    $this->goods[$key]['price'] = 5*$basePrice;
+        foreach ($this->member as $country) {
+            $stars = json_decode(Country::where(["tag"=>$country])->first()->stars,true);
+            foreach ($stars as $key => $value) {
+                $resource = json_decode(Star::where(["id"=>$value])->first()->resource,true);
+                foreach ($resource as $key2 => $value2) {
+                    $this->goods[$key2]['supplyOrder'] += $value2;
                 }
-                elseif ($this->goods[$key]['price'] < 0.1*$basePrice) {
+            }
+        }
+        $ecoType = Country::where(["tag"=>$this->owner])->first()->economyType;
+        if ($ecoType == 0) {
+            foreach ($this->goods as $key => $value) {
+                $basePrice = Good::where(["name"=>$key])->first()->basePrice;
+                $DO = $this->goods[$key]['demandOrder'];
+                $SO = $this->goods[$key]['supplyOrder'];
+                if ($this->goods[$key]['storage'] > 0) {
+                    $SO += $this->goods[$key]['storage'];
+                }
+                else {
+                    $DO += $this->goods[$key]['storage'];
+                }
+                if ($DO == 0) {
                     $this->goods[$key]['price'] = 0.1*$basePrice;
                 }
+                elseif ($SO == 0) {
+                    $this->goods[$key]['price'] = 5*$basePrice;
+                }
+                else {
+                    $this->goods[$key]['price'] = $basePrice*(1+0.75 * (($DO - $SO)/min($SO,$DO)));
+                    if ($this->goods[$key]['price'] > 5*$basePrice) {
+                        $this->goods[$key]['price'] = 5*$basePrice;
+                    }
+                    elseif ($this->goods[$key]['price'] < 0.1*$basePrice) {
+                        $this->goods[$key]['price'] = 0.1*$basePrice;
+                    }
+                }
+            }
+        } else {
+            $storage = json_decode(Country::where(["tag"=>$this->owner])->first()->storage, true);
+            foreach ($this->goods as $key => $value) {
+                $storage[$key] += $value['supplyOrder'];
+                $storage[$key] -= $value['demandOrder'];
             }
         }
         $this->UpdateMarket();
