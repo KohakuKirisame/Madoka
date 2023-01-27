@@ -46,29 +46,30 @@ Route::get("/News",[NewsController::class,"newsPage"])->middleware("isAuthedByRe
 Route::get("/News/{id}",[NewsController::class,"newsDetail"])->middleware("isAuthedByReimu")->where("id","[0-9]+");
 Route::get("/News/New",[NewsController::class,"newsNew"])->middleware("isAuthedByReimu");
 
-Route::prefix("Action")->group(function (){
-    Route::get("/Login",[UserController::class,"Auth"]);
-    Route::get("/Logout",[UserController::class,"LogOut"]);
-    Route::post("/ChangeOwner",[MapController::class,"changeOwner"])->middleware("isAuthedByReimu");
-    Route::post("/NewPlanet",[MapController::class,"newPlanet"])->middleware("isAuthedByReimu");
-    Route::post("/AdminNewPop",[PlanetController::class,"adminNewPop"])->middleware("isAuthedByReimu");
-    Route::post("/ReadPlanet",[PlanetController::class,"readPlanet"])->middleware("isAuthedByReimu");
-    Route::post("/ChangePlanetName",[PlanetController::class,"changePlanetName"])->middleware("isAuthedByReimu");
-    Route::post("/ChangeSize",[PlanetController::class,"changeSize"])->middleware("isAuthedByReimu");
-    Route::post("/BuildDistrict",[PlanetController::class,"buildDistrict"])->middleware("isAuthedByReimu");
-    Route::post("/ReadFleet",[MilitaryController::class,"readFleet"])->middleware("isAuthedByReimu");
-    Route::post("/ChangeFleetName",[MilitaryController::class,"changeFleetName"])->middleware("isAuthedByReimu");
-    Route::post("/ChangeShipName",[MilitaryController::class,"changeShipName"])->middleware("isAuthedByReimu");
-    Route::post("/ChangeFleetComputer",[MilitaryController::class,"changeFleetComputer"])->middleware("isAuthedByReimu");
-    Route::post("/ChangeFleetFTL",[MilitaryController::class,"changeFleetFTL"])->middleware("isAuthedByReimu");
-    Route::post("/AdminNewShip",[MilitaryController::class,"adminNewShip"])->middleware("isAuthedByReimu");
-    Route::post("/GetFleets",[MilitaryController::class,"getFleets"])->middleware("isAuthedByReimu");
-    Route::post("/FleetMerge",[MilitaryController::class,"fleetMerge"])->middleware("isAuthedByReimu");
-    Route::post("/ShipTrans",[MilitaryController::class,"shipTrans"])->middleware("isAuthedByReimu");
-    Route::post("/FleetDelete",[MilitaryController::class,"fleetDelete"])->middleware("isAuthedByReimu");
-    Route::post("/ChangeArmyName",[MilitaryController::class,"changeArmyName"])->middleware("isAuthedByReimu");
-    Route::post("/MoveArmy",[MilitaryController::class,"moveArmy"])->middleware("isAuthedByReimu");
-    Route::post("/ArmyDelete",[MilitaryController::class,"armyDelete"])->middleware("isAuthedByReimu");
+Route::prefix("Action")->group(function () {
+    Route::get("/Login", [UserController::class, "Auth"]);
+    Route::get("/Logout", [UserController::class, "LogOut"]);
+    Route::post("/ChangeOwner", [MapController::class, "changeOwner"])->middleware("isAuthedByReimu");
+    Route::post("/NewPlanet", [MapController::class, "newPlanet"])->middleware("isAuthedByReimu");
+    Route::post("/AdminNewPop", [PlanetController::class, "adminNewPop"])->middleware("isAuthedByReimu");
+    Route::post("/ReadPlanet", [PlanetController::class, "readPlanet"])->middleware("isAuthedByReimu");
+    Route::post("/ChangePlanetName", [PlanetController::class, "changePlanetName"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeSize", [PlanetController::class, "changeSize"])->middleware("isAuthedByReimu");
+    Route::post("/BuildDistrict", [PlanetController::class, "buildDistrict"])->middleware("isAuthedByReimu");
+    Route::post("/ReadFleet", [MilitaryController::class, "readFleet"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeFleetName", [MilitaryController::class, "changeFleetName"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeShipName", [MilitaryController::class, "changeShipName"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeFleetComputer", [MilitaryController::class, "changeFleetComputer"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeFleetFTL", [MilitaryController::class, "changeFleetFTL"])->middleware("isAuthedByReimu");
+    Route::post("/AdminNewShip", [MilitaryController::class, "adminNewShip"])->middleware("isAuthedByReimu");
+    Route::post("/GetFleets", [MilitaryController::class, "getFleets"])->middleware("isAuthedByReimu");
+    Route::post("/FleetMerge", [MilitaryController::class, "fleetMerge"])->middleware("isAuthedByReimu");
+    Route::post("/ShipTrans", [MilitaryController::class, "shipTrans"])->middleware("isAuthedByReimu");
+    Route::post("/FleetDelete", [MilitaryController::class, "fleetDelete"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeArmyName", [MilitaryController::class, "changeArmyName"])->middleware("isAuthedByReimu");
+    Route::post("/MoveArmy", [MilitaryController::class, "moveArmy"])->middleware("isAuthedByReimu");
+    Route::post("/ArmyDelete", [MilitaryController::class, "armyDelete"])->middleware("isAuthedByReimu");
+    Route::post("/NewFleet", [MilitaryController::class, "newFleet"])->middleware("isAuthedByReimu");
 });
 
 

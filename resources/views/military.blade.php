@@ -64,6 +64,7 @@
             </li>
         @endforeach
     </ul>
+    <button type="button" class="btn btn-primary" data-bs-target="#newFleetModal" data-bs-toggle="modal">新建舰队</button>
 </div>
 <div class="container my-4">
     <h1 class="text-center">陆军</h1>
@@ -223,6 +224,42 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="fleetDelete()">确认</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="newFleetModal" tabindex="-1" aria-labelledby="newFleetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新建舰队</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="col-8 container my-4 py-4 rounded shadow-lg">
+                    <div class="row">
+                        <div class="col-4">
+                            <input type="text" class="form-control" id="newFleetName" />
+                        </div>
+                        <div class="col-4">
+                            <select class="form-select" aria-label="weaponASelect" id="newFleetWeaponA">
+                                <option value="1" selected>能量武器</option>
+                                <option value="2">动能武器</option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <select class="form-select" aria-label="weaponBSelect" id="newFleetWeaponB">
+                                <option value="1" selected>能量武器</option>
+                                <option value="2">动能武器</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="adminButton"></div>
+                <button type="button" class="btn btn-success" data-bs-dismiss="model" onclick="newFleet({{$country}})">新建</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="model">返回</button>
             </div>
         </div>
     </div>

@@ -457,7 +457,7 @@ class MilitaryController extends Controller{
         }
         $computers = ShipComputer::get()->toArray();
         $shipTypes = ShipType::get()->toArray();
-        return view('military', ['user' => $user,"privilege"=>$privilege,
+        return view('military', ['user' => $user,"privilege"=>$privilege,"country"=>$country,
             'fleets'=>$fleets,"ftls"=>$ftls,"computers"=>$computers,"shipTypes"=>$shipTypes,
             'armys'=>$armys]);
     }
@@ -671,6 +671,28 @@ class MilitaryController extends Controller{
         $army = Fleet::where(["id"=>$request->input('id')])->first()->toArray();
         if (($privilege == 2 && $army['owner'] == $country) || $privilege <= 1) {
             Army::where(["id"=>$army['id']])->delete();
+        }
+    }
+    public function newFleet(Request $request) {
+        $uid = $request->session()->get('uid');
+        $country = $request->input('country');
+        $name = $request->input('name');
+        $weaponA = $request->input('weaponA');
+        $weaponB = $request->input('weaponB');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $capital = Country::where(["tag"=>$country])->first()->capital;
+        $privilege = $MadokaUser->privilege;
+        if (($MadokaUser->country == $country && $privilege == 2) || $privilege <= 1) {
+            $fleet = newFleet();
+            $fleet->owner = $country;
+            $fleet->name = $name;
+            $fleet->ships = '[]';
+            $fleet->position = $capital;
+            $fleet->ftl = 0;
+            $fleet->weaponA = $weaponA;
+            $fleet->weaponB = $weaponB;
+            $fleet->computer = 2;
+            $fleet->save();
         }
     }
 }

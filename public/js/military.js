@@ -156,6 +156,24 @@ function deleteArmy(id) {
         location.reload();
     });
 }
+function newFleet(owner) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    name = $('#newFleetName').val();
+    let weaponA = $('#newFleetWeaponA').val();
+    let weaponB = $('#newFleetWeaponB').val();
+    $.post('/Action/NewFleet', {
+        owner: owner,
+        name: name,
+        weaponA: weaponA,
+        weaponB: weaponB,
+    },function() {
+        location.reload();
+    });
+}
 function readFleet(id) {
     $.ajaxSetup({
         headers: {
