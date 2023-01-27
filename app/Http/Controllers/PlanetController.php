@@ -41,7 +41,7 @@ class PlanetController extends Controller {
             $this->tradeHubDistance = $p->tradeHubDistance;
             $this->leaderParty = $p->leaderParty;
             $goods = Good::get()->toArray();
-            $goodsArray = [];
+            $goodsArray = ['energy',];
             foreach ($this->product['market'] as $key => $value) {
                 $goodsArray[] = $key;
             }
@@ -70,12 +70,22 @@ class PlanetController extends Controller {
     }
     //资源计算//
     function countRes() {
+        $goods = Good::get()->toArray();
+        $goodsArray = [];
+        foreach ($this->product as $key => $value) {
+            $goodsArray[] = $key;
+        }
+        foreach ($goods as $good) {
+            if (!in_array($good['name'], $goodsArray)) {
+                $this->product = array_merge($this->product,[$good['name']=>0]);
+            }
+        }
         foreach ($this->product as $key => $value) {
             $this->product['market'][$key] = 0;
             $this->product['country'][$key] = 0;
         }
         foreach ($this->districts as $key => $value) {
-            if ($value['ownerShip'] != 3) {
+            if ($value['ownership'] != 3) {
                 foreach ($value['product'] as $key2 => $value2) {
                     $this->product['market'][$key2] += $value2;
                 }
@@ -100,7 +110,7 @@ class PlanetController extends Controller {
     //区划计算//
     function districtCount() {
         $market = new MarketController($this->controller);
-        $country = Country::where(["tag" => $this->owner]) - first();
+        $country = Country::where(["tag" => $this->owner])->first();
         $country->species = json_decode($country->species,true);
         $dTax = $country->districtTax;
         $upTax = $country->upTax;
@@ -108,8 +118,8 @@ class PlanetController extends Controller {
         $lowTax = $country->lowTax;
         $jobData = Job::get()->toArray();
         foreach ($this->districts as $key => $value) {
-            $disData = District::where(["name" => $key])->first;
-            if ($key == '行政区划') {
+            $disData = District::where(["name" => $value['name']])->first();
+            if ($value['name'] == '行政区划') {
                 if ($value['size'] != floor(count($this->pops) / 10)) {
                     $value['size'] = floor(count($this->pops) / 10);
                 }
@@ -172,12 +182,12 @@ class PlanetController extends Controller {
                             $demand = json_decode($data['demand'], true);
                             $supply = json_decode($data['supply'], true);
                             foreach ($demand as $goods => $value4) {
-                                $modifierName = Definition::where(["area" => "economy", "economyKey" => "consume", "modifierKey" => $key2])->first()->modifierName;
+                                $modifierName = Definition::where(["area" => "economy", "economyKey" => "consume", "modifierKey" => $goods])->first()->modifierName;
                                 $modifier = 1 + Country::where(["tag" => $this->owner])->first()->$modifierName;
                                 $this->districts[$key]['product'][$goods] -= $value4 * $modifier;
                             }
                             foreach ($supply as $goods => $value4) {
-                                $modifierName = Definition::where(["area" => "economy", "economyKey" => "produce", "modifierKey" => $key2])->first()->modifierName;
+                                $modifierName = Definition::where(["area" => "economy", "economyKey" => "produce", "modifierKey" => $goods])->first()->modifierName;
                                 $modifier = 1 + Country::where(["tag" => $this->owner])->first()->$modifierName;
                                 $this->districts[$key]['product'][$goods] += $value4 * $modifier;
                             }
@@ -424,12 +434,15 @@ class PlanetController extends Controller {
         }
         $profitArray = [];
         foreach ($this->districts as $key => $value) {
-            $profitArray[] = [$key => $value['profit']];
+            if ($value['name'] == '行政区划') {
+                continue;
+            }
+            $profitArray = array_merge($profitArray,[$value['name'] => $value['profit']]);
         }
-        $profitArray = arsort($profitArray);
-        $country = Country::where(["tag" => $this->owner])->first;
+        arsort($profitArray);
+        $country = Country::where(["tag" => $this->owner])->first();
         foreach ($profitArray as $key => $value) {
-            $disData = District::where(["name" => $key])->first;
+            $disData = District::where(["name" => $key])->first();
             if ($disData->buildCost <= $country->cashPool && ($sizeAll+1)<=$this->size) {
                 $this->districts[$key]['size'] += 1;
                 $country->cashPool -= $disData->buildCost;
@@ -469,7 +482,7 @@ class PlanetController extends Controller {
             }
             if (!$isExisted) {
                 $districts[] = ["name" => $district, "size" => 1, "cash" => 200, "ownership" => 2, "profit" => 0,
-                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []]];
+                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []],"pruduct"=>["zro"=>0,"gases"=>0, "grain"=>0, "motes"=>0, "satra"=>0, "alloys"=>0, "crystals"=>0, "minerals"=>0, "consume_goods"=>0]];
             }
         }
         $planet->districts = json_encode($districts,JSON_UNESCAPED_UNICODE);
@@ -496,7 +509,7 @@ class PlanetController extends Controller {
             }
             if (!$isExisted) {
                 $districts[] = ["name" => $district, "size" => 1, "cash" => 200, "ownership" => 0, "profit" => 0,
-                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []]];
+                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []],"pruduct"=>["zro"=>0,"gases"=>0, "grain"=>0, "motes"=>0, "satra"=>0, "alloys"=>0, "crystals"=>0, "minerals"=>0, "consume_goods"=>0]];
             }
         }
         $planet->districts = json_encode($districts,JSON_UNESCAPED_UNICODE);
@@ -522,28 +535,27 @@ class PlanetController extends Controller {
         }
         $this->popGrowthProcess += $growth;
         if ($this->popGrowthProcess >= 100) {
-            $result = Population::get();//$conn->query("SELECT * FROM Pops");
-            $pops = [];
-            foreach ($result as $item) {
-                $pops[] = $item;
+            $species = [];
+            foreach ($this->pops as $pop) {
+                $species[] = Population::where(["id"=>$pop])->first()->species;
             }
-            $id = 0;
-            foreach ($pops as $key => $value) {
-                if ($value[0] > $id ) {
-                    $id = $value[0]+1;
-                }
-            }
-            $id +=1;
-            $p = new PopController($id);
-            $species = array();
-            foreach ($pops as $key => $value) {
-                if ($value[2] == $this->id) {
-                    array_push($species,$value[1]);
-                }
+            if (count($species) == 0) {
+                return;
             }
             $key = array_rand($species,1);
-            $p->newPop($species[$key],$this->id);
-            array_push($this->pops,$id);
+            $pop = new Population();
+            $pop->species = $species[$key];
+            $pop->position = $this->id;
+            $pop->job = '无';
+            $pop->class = 'low';
+            $pop->workat = '无';
+            $pop->ethic = '';
+            $pop->ig = '';
+            $pop->party = '';
+            $pop->cash = 20;
+            $pop->struggle = 0;
+            $pop->save();
+            $this->pops[] = $pop->id;
             $this->popGrowthProcess = $this->popGrowthProcess-100;
         }
         $this->updatePlanet();
@@ -551,13 +563,14 @@ class PlanetController extends Controller {
     //贸易中心搜索//
     function searchNearestHub($hubArray) {
         $hypers = Star::get()->toArray();
-        $hyperLanes=$hypers[$this->position]->first()->hyperlane;
+        $hyperLanes=$hypers[$this->position]['hyperlane'];
         $hyperLanes=json_decode($hyperLanes,true);
         $queue = [];
-        if(Station::where("position",$this->position)->first()->isTradeHub==1){
+        if(Star::where("id",$this->position)->first()->isTradeHub==1){
             return([$this->position,0]);
         }
         $depth=1;
+        $isReached = false;
         while(true){
             foreach($hyperLanes as $hyperLane){
                 $queue[] = [$hyperLane["to"],$depth];
@@ -571,28 +584,33 @@ class PlanetController extends Controller {
                 return([$target,$depth]);
             }else{
                 $start=array_shift($queue);
-                $hyperLanes=$hypers[$start[0]]->hyperlane;
+                $hyperLanes=$hypers[$start[0]]['hyperlane'];
                 $hyperLanes=json_decode($hyperLanes,true);
                 $depth=$start[1]+1;
             }
         }
     }
     function searchTradeHub() {
+        if ($this->owner == '' && $this->id == 1) {
+            return 0;
+        }
         $stars = Star::get()->toArray();
         $hubArray = [];
         foreach ($stars as $key => $value) {
             $stars[$key]['hyperlane'] = json_decode($value['hyperlane'],true);
-            if ($stars[$key]['stationType'] != '' && $stars[$key]['stationType'] != 'outpost') {
-                $isTradeHub = Station::where(["position" => $value['id']])->first()->isTradeHub;
-                if ($stars[$key]['owner'] == $this->owner && $isTradeHub == 1) {
-                    $hubArray[] = $value['id'];
-                }
+            $isTradeHub = Star::where(["id" => $value['id']])->first()->isTradeHub;
+            if ($stars[$key]['owner'] == $this->owner && $isTradeHub == 1 && $stars[$key]['owner'] != '') {
+                $hubArray[] = $value['id'];
             }
         }
-        $ans = $this->searchNearestHub($hubArray);
-        $this->nearTradeHub = $ans[0];
-        $this->tradeHubDistance = $ans[1];;
-        $this->updatePlanet();
+        if (count($hubArray) != 0) {
+            $ans = $this->searchNearestHub($hubArray);
+            $this->nearTradeHub = $ans[0];
+            $this->tradeHubDistance = $ans[1];;
+            $this->updatePlanet();
+        }else {
+            return 0;
+        }
     }
 
     public function planetPage(Request $request){

@@ -3,28 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use App\Models\Good;
 use App\Models\Market;
-use app\Models\Planet;
-use app\Models\Star;
+use App\Models\Planet;
+use App\Models\Star;
 use App\Models\Station;
 
 class MarketController extends Controller {
-    public var $owner;
+    public string $owner;
     public array $member,$planets,$trades,$goods;
     function __construct($country) {
         $m = Market::where(["owner"=>$country])->first();
         $this->owner = $country;
+        echo $country;
         if (is_null($m)) {
             $result = Market::get();
             foreach ($result as $item) {
-                $members = json_decode($item->members, true);
+                $members = json_decode($item->member, true);
                 if (in_array($country,$members)) {
-                    $m = Market::where(["owner"=>$item->owner]);
                     $this->owner = $item->owner;
                     break;
                 }
             }
         }
+        $m = Market::where(["owner"=>$this->owner])->first();
         $this->member = json_decode($m->member,true);
         $this->planets = json_decode($m->planets,true);
         $this->trades = json_decode($m->trades,true);
@@ -36,7 +38,7 @@ class MarketController extends Controller {
         }
         foreach ($goods as $good) {
             if (!in_array($good['name'], $goodsArray)) {
-                $this->goods[] = [$good['name']=>["demandOrder"=>0,"supplyOrder"=>0,"price"=>$good['basePrice']]];
+                $this->goods = array_merge($this->goods,[$good['name']=>["demandOrder"=>0,"supplyOrder"=>0,"price"=>$good['basePrice'],"storage"=>0]]);
             }
         }
     }
@@ -54,7 +56,7 @@ class MarketController extends Controller {
             $this->goods[$key]['demandOrder'] = 0;
         }
         foreach ($this->planets as $key => $value) {
-            $product = json_decode(Planet::where(["id"=>$value])->first->product,true);
+            $product = json_decode(Planet::where(["id"=>$value])->first()->product,true);
             foreach ($this->goods as $key2 => $value2) {
                 if ($product[$key2] < 0) {
                     $this->goods[$key2]['demandOrder'] -= $product[$key2];
@@ -115,10 +117,22 @@ class MarketController extends Controller {
             }
         } else {
             $storage = json_decode(Country::where(["tag"=>$this->owner])->first()->storage, true);
+            $goods = Good::get()->toArray();
+            $goodsArray = [];
+            foreach ($storage as $key => $value) {
+                $goodsArray[] = $key;
+            }
+            foreach ($goods as $good) {
+                if (!in_array($good['name'], $goodsArray)) {
+                    $storage = array_merge($storage,[$good['name'] => 0]);
+                }
+            }
             foreach ($this->goods as $key => $value) {
                 $storage[$key] += $value['supplyOrder'];
                 $storage[$key] -= $value['demandOrder'];
             }
+            $storage = json_encode($storage,JSON_UNESCAPED_UNICODE);
+            Country::where(["tag"=>$this->owner])->update(["storage"=>$storage]);
         }
         $this->UpdateMarket();
     }

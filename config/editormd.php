@@ -1,6 +1,6 @@
 <?php
 return [
-    'upload_path' => '/',//上传文件的地址
+    'upload_path' => '',//上传文件的地址
     'upload_type' => 'qiniu',//上传的方式qiniu或者本地,默认为本地
     'upload_http' => 'https',//https或者为空
     //本地:'',七牛:'qiniu'

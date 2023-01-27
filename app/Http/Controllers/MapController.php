@@ -17,6 +17,9 @@ class MapController extends Controller {
             $privilege = User::where("uid", $uid)->first()->privilege;
             if (!is_null($privilege)) {
                 $stars = Star::get()->toArray();
+                foreach ($stars as $key => $value) {
+                    $stars[$key]['resource'] = json_decode($value['resource'], true);
+                }
                 $countries = Country::get()->toArray();
                 $stations = Station::get()->toArray();
                 $planets = Planet::get()->toArray();

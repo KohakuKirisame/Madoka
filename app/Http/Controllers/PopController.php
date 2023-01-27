@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use App\Models\District;
 use App\Models\Planet;
 use App\Models\Population;
 use App\Models\Species;
@@ -12,11 +13,13 @@ class PopController extends Controller {
     public string $species,$job,$class,$workat,$ethic,$ig,$party;
     public float $cash,$struggle;
     function __construct($id) {
+        echo $id;
         $p = Population::where(["id"=>$id])->first();
         $this->id = $id;
         $this->position = $p->position;
         $this->species = $p->species;
         $this->job = $p->job;
+        $this->class = $p->class;
         $this->workat = $p->workat;
         $this->ethic = $p->ethic;
         $this->ig = $p->ig;
@@ -27,6 +30,7 @@ class PopController extends Controller {
     //自动寻找工作//
     function findJob() {
         $country = Country::get()->toArray();
+        $right = 0;
         foreach ($country as $key => $value) {
             $country[$key]['planets'] = json_decode($value['planets']);
             if (in_array($this->position,$country[$key]['planets'])) {
@@ -42,11 +46,11 @@ class PopController extends Controller {
         }
         if ($this->job == '无' || $this->workat == '无') {
             $p = Planet::where(["id" => $this->position])->first();
-            $p->districts = json_decode($p->districts, true);
-            foreach ($p->districts as $key => $value) {
-                $d = District::where(["name" => $key])->first;
+            $districts = json_decode($p->districts, true);
+            foreach ($districts as $key => $value) {
+                $d = District::where(["name" => $value['name']])->first();
                 $d->job = json_decode($d->job, true);
-                if ($p->districts[$key]['ownership'] != 2) {
+                if ($districts[$key]['ownership'] != 2) {
                     $upJob = 0;
                     foreach ($d->job['upJob'] as $key2 => $value2) {
                         $upJob += $value2;
@@ -60,8 +64,8 @@ class PopController extends Controller {
                             break;
                         }
                         $this->class = 'up';
-                        $this->workat = $key;
-                        $p->districts[$key]['jobs']['upJob'][] = $this->id * 1;
+                        $this->workat = $value['name'];
+                        $districts[$key]['jobs']['upJob'][] = $this->id * 1;
                         break;
                     }
                 }
@@ -75,8 +79,8 @@ class PopController extends Controller {
                         break;
                     }
                     $this->class = 'mid';
-                    $this->workat = $key;
-                    $p->districts[$key]['jobs']['midJob'][] = $this->id * 1;
+                    $this->workat = $value['name'];
+                    $districts[$key]['jobs']['midJob'][] = $this->id * 1;
                     break;
                 }
                 $lowJob = 0;
@@ -85,92 +89,98 @@ class PopController extends Controller {
                 }
                 if (count($value['jobs']['lowJob']) < $value['size'] * $lowJob) {
                     if ($right == 0) {
-                        $p->districts[$key] -= 500;
+                        $districts[$key]['cash'] -= 500;
                     }
                     foreach ($d->job['lowJob'] as $job => $number) {
                         $this->job = $job;
                         break;
                     }
                     $this->class = 'low';
-                    $this->workat = $key;
-                    $p->districts[$key]['jobs']['lowJob'][] = $this->id * 1;
+                    $this->workat = $value['name'];
+                    $districts[$key]['jobs']['lowJob'][] = $this->id * 1;
                     break;
                 }
             }
         } //////////
         else {
             $p = Planet::where(["id" => $this->position * 1])->first();
-            $p->districts = json_decode($p->districts, true);
+            $districts = json_decode($p->districts, true);
             $profitArray = [];
-            foreach ($p->districts as $key => $value) {
-                $profitArray[] = [$key => $value['profit']];
+            foreach ($districts as $key => $value) {
+                $profitArray= array_merge($profitArray,[$value['name']=>$value]);
             }
-            $profitArray = arsort($profitArray);
+            arsort($profitArray);
             foreach ($profitArray as $key => $value) {
                 $d = District::where(["name" => $key])->first();
-                $d->job = json_decode($d->job, true);
-                if ($p->districts[$key]['ownership'] != 2) {
+                $jobs = json_decode($d->job, true);
+                foreach ($districts as $key2 => $district) {
+                    if ($key == $district['name']) {
+                        $key = $key2;
+                        break;
+                    }
+                }
+                if ($districts[$key]['ownership'] != 2) {
                     $upJob = 0;
-                    foreach ($d->job['upJob'] as $key2 => $value2) {
+                    foreach ($jobs['upJob'] as $key2 => $value2) {
                         $upJob += $value2;
                     }
-                    if (round($value['size']) * count($value['jobs']['upJob']) < $upJob) {
-                        foreach ($d->job['upJob'] as $job => $number) {
+                    if (round($districts[$key]['size']) * count($districts[$key]['jobs']['upJob']) < $upJob) {
+                        foreach ($jobs['upJob'] as $job => $number) {
                             $this->job = $job;
                             break;
                         }
                         $this->class = 'up';
-                        $this->workat = $key;
-                        $p->districts[$key]['jobs']['upJob'][] = $this->id * 1;
-                        foreach ($p->districts[$this->workat]['jobs'] as $key2 => $value2) {
+                        $this->workat = $value['name'];
+                        $districts[$key]['jobs']['upJob'][] = $this->id * 1;
+                        foreach ($districts[$key]['jobs'] as $key2 => $value2) {
                             $key3 = array_search($this->id, $value2);
-                            unset($p->districts[$this->workat]['jobs'][$key2][$key3]);
+                            unset($districts[$key]['jobs'][$key2][$key3]);
                             break 2;
                         }
                         break;
                     }
                 }
                 $midJob = 0;
-                 foreach ($d->job['midJob'] as $key2 => $value2) {
+                 foreach ($jobs['midJob'] as $key2 => $value2) {
                     $midJob += $value2;
                 }
-                if (round($value['size']) * count($value['jobs']['midJob']) < $midJob && $this->job != 'up') {
-                    foreach ($d->job['midJob'] as $job => $number) {
+                if (round($districts[$key]['size']) * count($districts[$key]['jobs']['midJob']) < $midJob && $this->job != 'up') {
+                    foreach ($jobs['midJob'] as $job => $number) {
                         $this->job = $job;
                         break;
                     }
                     $this->class = 'mid';
-                    $this->workat = $key;
-                    $p->districts[$key]['jobs']['midJob'][] = $this->id * 1;
-                    foreach ($p->districts[$this->workat]['jobs'] as $key2 => $value2) {
+                    $this->workat = $districts[$key]['name'];
+                    $districts[$key]['jobs']['midJob'][] = $this->id * 1;
+                    foreach ($districts[$key]['jobs'] as $key2 => $value2) {
                         $key3 = array_search($this->id, $value2);
-                        unset($p->districts[$this->workat]['jobs'][$key2][$key3]);
+                        unset($districts[$key]['jobs'][$key2][$key3]);
                         break 2;
                     }
                     break;
                 }
                 $lowJob = 0;
-                foreach ($d->job['lowJob'] as $key2 => $value2) {
+                foreach ($jobs['lowJob'] as $key2 => $value2) {
                     $lowJob += $value2;
                 }
-                if (round($value['size']) * count($p->districts[$key]['jobs']['lowJob']) < $lowJob && $this->job == 'low') {
-                    foreach ($d->job['lowJob'] as $job => $number) {
+                if (round($districts[$key]['size']) * count($districts[$key]['jobs']['lowJob']) < $lowJob && $this->job == 'low') {
+                    foreach ($jobs['lowJob'] as $job => $number) {
                         $this->job = $job;
                         break;
                     }
                     $this->class = 'low';
-                    $this->workat = $key;
-                    $p->districts[$key]['jobs']['lowJob'][] = $this->id * 1;
-                    foreach ($p->districts[$this->workat]['jobs'] as $key2 => $value2) {
+                    $this->workat = $districts[$key]['name'];
+                    $districts[$key]['jobs']['lowJob'][] = $this->id * 1;
+                    foreach ($districts[$key]['jobs'] as $key2 => $value2) {
                         $key3 = array_search($this->id, $value2);
-                        unset($p->districts[$this->workat]['jobs'][$key2][$key3]);
+                        unset($districts[$key]['jobs'][$key2][$key3]);
                         break 2;
                     }
                     break;
                 }
             }
         }
-        $districts = json_encode($p->districts, JSON_UNESCAPED_UNICODE);
+        $p->districts = json_encode($districts, JSON_UNESCAPED_UNICODE);
         Planet::where(["id" => $this->position])->update(["districts" => $districts]);
         Population::where(["id" => $this->id])->update(["job" => $this->job,"class"=>$this->class,"workat" => $this->workat]);
     }
@@ -199,17 +209,19 @@ class PopController extends Controller {
         $country = Country::get()->toArray();
         $economyType = 0;
         $nationality = '';
+        $nationalityKey = '';
         foreach ($country as $key => $value) {
             $country[$key]['planets'] = json_decode($value['planets']);
             if (in_array($this->position,$country[$key]['planets'])) {
                 $economyType = $country[$key]['economyType'];
                 $m = new MarketController($country[$key]['tag']);
                 $nationality = $country[$key]['tag'];
+                $nationalityKey = $key;
                 break;
             }
         }
         if ($economyType == 0) {
-            $planetProduct = json_decode(Planet::where(["id"=>$this->positions])->first()->product,true);
+            $planetProduct = json_decode(Planet::where(["id"=>$this->position])->first()->product,true);
             foreach ($needs[$this->class] as $key => $value) {
                 $this->cash -= $m->goods[$key]['price']*$value;
                 if ($this->cash < 0) {
@@ -220,16 +232,16 @@ class PopController extends Controller {
             }
             Population::where(["id"=>$this->id])->update(["cash"=>$this->cash,"struggle"=>$this->struggle]);
             $planetProduct = json_encode($planetProduct,JSON_UNESCAPED_UNICODE);
-            Planet::where(["id"=>$this->positions])->update(["product"=>$planetProduct]);
+            Planet::where(["id"=>$this->position])->update(["product"=>$planetProduct]);
         }
         else {
-            $planetProduct = json_decode(Planet::where(["id"=>$this->positions])->first()->product,true);
-            $storage = json_decode($country[$nationality]['storage'],true);
+            $planetProduct = json_decode(Planet::where(["id"=>$this->position])->first()->product,true);
+            $storage = json_decode($country[$nationalityKey]['storage'],true);
             foreach ($needs[$this->class] as $key => $value) {
                 $planetProduct['country'][$key] -= $value;
             }
             $planetProduct = json_encode($planetProduct,JSON_UNESCAPED_UNICODE);
-            Planet::where(["id"=>$this->positions])->update(["product"=>$planetProduct]);
+            Planet::where(["id"=>$this->position])->update(["product"=>$planetProduct]);
         }
     }
 }

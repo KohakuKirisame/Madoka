@@ -461,8 +461,9 @@ class MilitaryController extends Controller{
             }
             $fleets[$key] = $fleet;
         }
-        foreach ($armys as $army) {
+        foreach ($armys as $key => $army) {
             $army['position'] = Star::where(["id"=>$army['position']])->first()->name;
+            $armys[$key] = $army;
         }
         $computers = ShipComputer::get()->toArray();
         $shipTypes = ShipType::get()->toArray();
@@ -689,10 +690,15 @@ class MilitaryController extends Controller{
         $weaponA = $request->input('weaponA');
         $weaponB = $request->input('weaponB');
         $MadokaUser = User::where(["uid"=>$uid])->first();
-        $capital = Country::where(["tag"=>$country])->first()->capital;
         $privilege = $MadokaUser->privilege;
+        if (!is_null($country)) {
+            $capital = Country::where(["tag" => $country])->first()->capital;
+        } else {
+            $capital = 0;
+            $country = 'GSK';
+        }
         if (($MadokaUser->country == $country && $privilege == 2) || $privilege <= 1) {
-            $fleet = newFleet();
+            $fleet = new Fleet();
             $fleet->owner = $country;
             $fleet->name = $name;
             $fleet->ships = '[]';

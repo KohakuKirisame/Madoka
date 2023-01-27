@@ -11,7 +11,7 @@
 <div class="container my-4">
     <h1 class="text-center">星球</h1>
 </div>
-<div class="container my-4 py-4 rounded shadow-lg" style="background: #FFFFFF">
+<div class="container mt-4 py-4 rounded shadow-lg mb-5" style="background: #FFFFFF">
     <ul class="list-group list-group-flush">
         <li class="list-group-item">
             <div class="row">

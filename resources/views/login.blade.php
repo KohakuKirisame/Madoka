@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
 <body>
+<iframe style="display: none" frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=22731512&auto=1&height=66"></iframe>
     <div class="bgimg" id="bgimg"></div>
     <div class="container center-content rounded" onmouseover="$('#bgimg').addClass('imgblur')" onmouseout="$('#bgimg').removeClass('imgblur')">
         <div class="row justify-content-center">

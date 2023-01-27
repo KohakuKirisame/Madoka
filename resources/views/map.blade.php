@@ -44,7 +44,7 @@
         @if ($privilege == 0 || $privilege == 1)
             <button type='button' class='btn btn-default dropdown-toggle'
                     style='position: absolute;
-                            top: {{$y-16}}px; left: {{$x+13.75}}px; width: 20px;height: 20px;
+                            top: {{$y-20}}px; left: {{$x+13.75}}px; width: 20px;height: 20px;
                             border-radius: 100%;
                             background-color:hsla(0,0%,0%,0.00);
                             border:none ;
@@ -106,10 +106,36 @@
                     </li>
                 @endfor
             </ul>
+            <button type='button' class='btn btn-default'
+                    style='position: absolute;
+                top: {{$y-20}}px; left: {{$x+10}}px; width: 20px;height: 20px;
+                border-radius: 100%;
+                background-color:hsla(0,0%,0%,0.00);
+                border:none ;
+                padding:0px 0px'
+                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
+                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+                @if($stars[$i]['isTradeHub'] == 1)
+                    <img src='storage/img/trade.png' width='17.5px' />
+                @endif
+            </button>
+            <button type='button' class='btn btn-default'
+                    style='position: absolute;
+                    top: {{$y}}px; left: {{$x+10}}px; width: 20px;height: 20px;
+                    border-radius: 100%;
+                    background-color:hsla(0,0%,0%,0.00);
+                    border:none ;
+                    padding:0px 0px'
+                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
+                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+                @if($stars[$i]['isCapital'] == 1)
+                    <img src='storage/img/capital.png' width='17.5px' />
+                @endif
+            </button>
             @else
             <button type='button' class='btn btn-default'
                     style='position: absolute;
-                        top: {{$y-16}}px; left: {{$x+13.75}}px; width: 20px;height: 20px;
+                        top: {{$y-20}}px; left: {{$x+13.75}}px; width: 20px;height: 20px;
                         border-radius: 100%;
                         background-color:hsla(0,0%,0%,0.00);
                         border:none ;
@@ -135,6 +161,32 @@
                 @endif
             </button>
             <button type='button' class='btn btn-default'
+                    style='position: absolute;
+                    top: {{$y-20}}px; left: {{$x+10}}px; width: 20px;height: 20px;
+                    border-radius: 100%;
+                    background-color:hsla(0,0%,0%,0.00);
+                    border:none ;
+                    padding:0px 0px'
+                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
+                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+                @if($stars[$i]['isTradeHub'] == 1)
+                    <img src='storage/img/trade.png' width='17.5px' />
+                @endif
+            </button>
+            <button type='button' class='btn btn-default'
+                    style='position: absolute;
+                top: {{$y}}px; left: {{$x+10}}px; width: 20px;height: 20px;
+                border-radius: 100%;
+                background-color:hsla(0,0%,0%,0.00);
+                border:none ;
+                padding:0px 0px'
+                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
+                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+                @if($stars[$i]['isCapital'] == 1)
+                    <img src='storage/img/capital.png' width='17.5px' />
+                @endif
+            </button>
+            <button type='button' class='btn btn-default'
                               style='position: absolute;
                     top: {{$y-13.75}}px; left: {{$x-13.75}}px; width: 27.5px;height: 27.5px;
                     border-radius: 100%;
@@ -147,7 +199,15 @@
                               data-bs-container ='body'
                               title={{$stars[$i]['name']}}
                               data-bs-html='true'
-                              data-bs-content='当前受控于{{$countryName}}'>
+                              data-bs-content='当前受控于{{$countryName}}
+                              <p>本星系包含
+                                @foreach($stars[$i]['resource'] as $res=>$value)
+                                    @if($value == 0)
+                                        @php continue;@endphp
+                                    @endif
+                                    <span class="badge bg-light text-dark"><img src="storage/img/resource/{{$res}}.png"/ width="20px">{{$value}}</span>
+                                @endforeach
+                              </p>'>
                 @if($type == 'sc_black_hole' || $type == 'sc_pulsar' || $type == 'sc_neutron_star')
                     <img src='{{asset("storage/img/".$type.".png")}}' width='27.5px' />
                 @endif

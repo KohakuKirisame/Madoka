@@ -7,7 +7,7 @@ use App\Models\Definition;
 use App\Models\Planet;
 use App\Models\Tech;
 use App\Models\TechArea;
-use http\Env\Request;
+use Illuminate\Http\Request;
 
 class CountryController
 {
@@ -70,9 +70,9 @@ class CountryController
                 unset($item);
             }
         }
-        $techs = json_encode($this->techs,JSON_UNESCAPED_UNICODE);
-        $techList = json_encode($this->techList,JSON_UNESCAPED_UNICODE);
-        Country::where(["tag"=>$this->tag])->update(["techList"=>$techList,"techs"=>$techs,"ModifierList"=>$country->ModifierList]);
+        $techs = json_encode($techs,JSON_UNESCAPED_UNICODE);
+        $techList = json_encode($techList,JSON_UNESCAPED_UNICODE);
+        Country::where(["tag"=>$this->tag])->update(["techList"=>$techList,"techs"=>$techs,"ModifierList"=>$country['ModifierList']]);
     }
     function modifierCount() {
         $country = Country::where(["tag"=>$this->tag])->first();
@@ -85,18 +85,20 @@ class CountryController
             }
         }
         foreach ($modifierIDs as $modifier) {
-            $country->$modifier['name'] = 0;
+            $name = $modifier['name'];
+            $country->$name = 0;
         }
-        foreach($country['ModifierList'] as $modifier)  {
-            foreach($modifier['modifier'] as $key => $value) {
+        foreach($ModifierList as $item)  {
+            foreach($item['modifier'] as $key => $value) {
                 $country->$key += $value;
             }
         }
         $country->save();
     }
     public function mainFunction($id) {
-        $self = Planet::where(["owner"=>$id])->fitst();
-        $planets = json_decode($self->planets,true);
+        ini_set("display_errors", "On");
+        ini_set("error_reporting", E_ALL);
+        $planets = json_decode(Country::where('tag', $id)->first()->planets,true);
         foreach($planets as $value) {
             $planet = new PlanetController($value);
             $planet->searchTradeHub();
@@ -104,11 +106,13 @@ class CountryController
             $planet->investDistrict();
             $planet->countRes();
             $planet->popGrowth();
-            foreach ($planet['pops'] as $value2) {
+            echo "星球遍历",$value;
+            foreach ($planet->pops as $value2) {
                 $pop = new PopController($value2);
                 $pop->findJob();
                 $pop->getNeeds();
                 $pop->invest();
+                echo "人口遍历",$value2;
             }
         }
         $market = new MarketController($id);

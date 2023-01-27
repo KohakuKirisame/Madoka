@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EconomyController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
@@ -45,10 +46,12 @@ Route::get("/Military",[MilitaryController::class,"militaryPage"])->middleware("
 Route::get("/News",[NewsController::class,"newsPage"])->middleware("isAuthedByReimu");
 Route::get("/News/{id}",[NewsController::class,"newsDetail"])->middleware("isAuthedByReimu")->where("id","[0-9]+");
 Route::get("/News/New",[NewsController::class,"newsNew"])->middleware("isAuthedByReimu");
+Route::get("/News/Edit/{id}",[NewsController::class,"newsEdit"])->middleware("isAuthedByReimu")->where("id","[0-9]+");
 
 Route::prefix("Action")->group(function () {
     Route::get("/Login", [UserController::class, "Auth"]);
     Route::get("/Logout", [UserController::class, "LogOut"]);
+    Route::post("/MainFunction", [EconomyController::class, "allMainFunction"])->middleware("isAuthedByReimu");
     Route::post("/ChangeOwner", [MapController::class, "changeOwner"])->middleware("isAuthedByReimu");
     Route::post("/NewPlanet", [MapController::class, "newPlanet"])->middleware("isAuthedByReimu");
     Route::post("/AdminNewPop", [PlanetController::class, "adminNewPop"])->middleware("isAuthedByReimu");
@@ -71,6 +74,8 @@ Route::prefix("Action")->group(function () {
     Route::post("/MoveArmy", [MilitaryController::class, "moveArmy"])->middleware("isAuthedByReimu");
     Route::post("/ArmyDelete", [MilitaryController::class, "armyDelete"])->middleware("isAuthedByReimu");
     Route::post("/NewFleet", [MilitaryController::class, "newFleet"])->middleware("isAuthedByReimu");
+    Route::post("/SaveNews",[NewsController::class,"newsSave"])->middleware("isAuthedByReimu");
+    Route::get("/PassNews/{id}",[NewsController::class,"newsPass"])->middleware("isAuthedByReimu");
 });
 
 

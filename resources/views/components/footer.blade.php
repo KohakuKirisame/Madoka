@@ -1,4 +1,4 @@
-<footer class="fixed-bottom">
+<footer class="fixed-bottom" style="background: rgba(255,255,255,0.65)">
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">

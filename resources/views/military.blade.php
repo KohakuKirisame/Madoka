@@ -64,7 +64,9 @@
             </li>
         @endforeach
     </ul>
-    <button type="button" class="btn btn-primary" data-bs-target="#newFleetModal" data-bs-toggle="modal">新建舰队</button>
+    <div class="row">
+        <button type="button" class="btn btn-primary" data-bs-target="#newFleetModal" data-bs-toggle="modal">新建舰队</button>
+    </div>
 </div>
 <div class="container my-4">
     <h1 class="text-center">陆军</h1>
