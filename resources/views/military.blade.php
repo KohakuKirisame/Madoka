@@ -65,6 +65,44 @@
         @endforeach
     </ul>
 </div>
+<div class="container my-4">
+    <h1 class="text-center">陆军</h1>
+</div>
+<div class="container my-4 py-4 rounded shadow-lg" style="background: #FFFFFF">
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+            <div class="row">
+                <h5 class="col-2 text-center">陆军</h5>
+                <h5 class="col-2 text-center">位置</h5>
+                <h5 class="col-2 text-center">数量</h5>
+                <h5 class="col-2 text-center">伤害</h5>
+                <h5 class="col-2 text-center">生命</h5>
+                <h5 class="col-2 text-center">操作</h5>
+            </div>
+        </li>
+        @foreach($armys as $army)
+            <li class="list-group-item">
+                <div class="row">
+                    @if($privilege==3)
+                        <p class="col-2 text-center">{{$army['name']}}</p>
+                    @else
+                        <div class="col-2">
+                            <input type="text" class="form-control" id="armyName-{{$army['id']}}" value="{{$army['name']}}" onchange="changeArmyName({{$army['id']}})"/>
+                        </div>
+                    @endif
+                    <p class="col-2 text-center">{{$army['position']}}</p>
+                    <p class="col-2 text-center">{{$army['quantity']}}</p>
+                    <p class="col-2 text-center">{{$army['damage']}}</p>
+                    <p class="col-2 text-center">{{$army['HP']}}</p>
+                    <p class="col-2 text-center">
+                        <button class="btn btn-primary" type="button" onclick="moveArmy({{$army['id']}},{{$privilege}})">移动</button>
+                        <button class="btn btn-danger" type="button" onclick="deleteArmy({{$army['id']}})">解散</button>
+                    </p>
+                </div>
+            </li>
+        @endforeach
+    </ul>
+</div>
 @include('components.footer')
 <div class="modal fade" id="fleetModal" tabindex="-1" aria-labelledby="fleetModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

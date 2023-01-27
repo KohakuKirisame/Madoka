@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Army;
 use App\Models\Country;
 use App\Models\Definition;
 use App\Models\Fleet;
@@ -314,6 +315,38 @@ class MilitaryController extends Controller{
             }
         }
     }
+    public function armyBattle($army1, $army2) {
+        $army1 = Army::where(["id" => $army1])->first()->toArray();
+        $army2 = Army::where(["id" => $army2])->first()->toArray();
+        $country1 = Country::where(["tag" => $army1['owner']])->first()->toArray();
+        $country2 = Country::where(["tag" => $army2['owner']])->first()->toArray();
+        $army1FullHP = $army1['HP']*(1+($country1['armyHPModifier']));
+        $army1['HP'] = $army1FullHP;
+        $army1['damage'] *= 1+($country1['armyDamageModifier']);
+        $army2FullHP = $army2['HP']*(1+($country2['armyHPModifier']));
+        $army2['HP'] = $army2FullHP;
+        $army2['damage'] *= 1+($country2['armyDamageModifier']);
+        while ($army1['HP']>0 && $army2['HP']>0) {
+            $army2['HP'] -= $army1['damage'];
+            $army1['HP'] -= $army2['damage'];
+            $army1['quantity'] = round($army1['HP']/$army1FullHP);
+            $army1['damage'] = $army1['quantity']*10*(1+($country1['armyDamageModifier']));
+            $army2['quantity'] = round($army2['HP']/$army2FullHP);
+            $army2['damage'] = $army2['quantity']*10*(1+($country2['armyDamageModifier']));
+        }
+        if ($army1['HP'] <= 0 && $army1['quantity'] <= 0) {
+            Army::where(["id" => $army1])->delete();
+        } else {
+            $army1['HP'] = $army1['quantity']*100*(1+($country1['armyHPModifier']));
+            Army::where(["id" => $army1])->update(["HP"=>$army1['HP'],"damage"=>$army1['damage'],'quantity'=>$army1['quantity']]);
+        }
+        if ($army2['HP'] <= 0 && $army2['quantity'] <= 0) {
+            Army::where(["id" => $army2])->delete();
+        } else {
+            $army2['HP'] = $army2['quantity']*100*(1+($country2['armyHPModifier']));
+            Army::where(["id" => $army2])->update(["HP"=>$army2['HP'],"damage"=>$army2['damage'],"quantity"=>$army2['quantity']]);
+        }
+    }
     public function fleetCount($id){
         $fleet = Fleet::where(["id" => $id])->first()->toArray();
         $fleet['ships'] = json_decode($fleet['ships'],true);
@@ -385,6 +418,7 @@ class MilitaryController extends Controller{
         if ($privilege <= 1) {
             $fleets = Fleet::get()->toArray();
             $ftls = ["超空间引擎","曲率引擎"];
+            $armys = Army::get()->toArray();
         } elseif ($privilege == 2) {
             $fleets = Fleet::where(["owner"=>$country])->get()->toArray();
             $ftls = ["超空间引擎",];
@@ -392,6 +426,7 @@ class MilitaryController extends Controller{
             if (in_array("曲率引擎",$techs)) {
                 $ftls[] = "曲率引擎";
             }
+            $armys = Army::where(["owner"=>$country])->get()->toArray();
         } else {
             return redirect('/Dashboard');
         }
@@ -417,10 +452,14 @@ class MilitaryController extends Controller{
             }
             $fleets[$key] = $fleet;
         }
+        foreach ($armys as $army) {
+            $army['position'] = Star::where(["id"=>$army['position']])->first()->name;
+        }
         $computers = ShipComputer::get()->toArray();
         $shipTypes = ShipType::get()->toArray();
         return view('military', ['user' => $user,"privilege"=>$privilege,
-            'fleets'=>$fleets,"ftls"=>$ftls,"computers"=>$computers,"shipTypes"=>$shipTypes]);
+            'fleets'=>$fleets,"ftls"=>$ftls,"computers"=>$computers,"shipTypes"=>$shipTypes,
+            'armys'=>$armys]);
     }
     public function readFleet(Request $request) {
         $id = $request->input('id');
@@ -557,6 +596,81 @@ class MilitaryController extends Controller{
                 Ship::where(["id"=>$ship])->delete();
             }
             Fleet::where(["id"=>$fleet1['id']])->delete();
+        }
+    }
+    public function changeArmyName(Request $request) {
+        $id = $request->input('id');
+        $name = $request->input("name");
+        Army::where('id', $id)->update(["name"=>$name]);
+    }
+    public function moveArmy(Request $request) {
+        $id = $request->input('id');
+        $targetStar = $request->input("target");
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        $army = Fleet::where(["id"=>$id])->first()->toArray();
+        if (($privilege == 2 && $army['owner'] == $country) || $privilege <= 1) {
+            $start = $army['position'];
+            $hyperLanes = Star::where("id", $start)->first()->hyperlane;
+            $hyperLanes = json_decode($hyperLanes, true);
+            $queue = [];
+            $previousStar = [$start, 0, 0];
+            $routeFinder = [[$start, 0],];
+            $visited = [$start,];
+            $isReached = false;
+            while (true) {
+                foreach ($hyperLanes as $hyperLane) {
+                    if (!in_array($hyperLane["to"], $visited)) {
+                        $queue[] = [$hyperLane["to"], $previousStar[1] + 1, $previousStar[0]];
+                        $routeFinder[] = [$hyperLane["to"], $previousStar[0]];
+                        $visited[] = $hyperLane["to"];
+                    }
+                    if (in_array($hyperLane["to"], $targetStar)) {
+                        $isReached = true;
+                        $target = $hyperLane["to"];
+                        break;
+                    }
+                }
+                if ($isReached) {
+                    $ans = [$target, $previousStar[1] + 1, $previousStar[0]];
+                    break;
+                } else {
+                    $previousStar = array_shift($queue);
+                    $hyperLanes = Star::where("id", $previousStar[0])->first()->hyperlane;
+                    $hyperLanes = json_decode($hyperLanes, true);
+                }
+            }
+            unset($hyperLanes);
+            unset($queue);
+            $route = [$target,];
+            $prev = $ans[2];
+            while (true) {
+                foreach ($routeFinder as $item) {
+                    if ($prev == 0) {
+                        break;
+                    } elseif ($prev == $item[0]) {
+                        $route[] = $item[0];
+                        $prev = $item[1];
+                    }
+                }
+                if ($prev == 0) {
+                    break;
+                }
+            }
+            $route = array_reverse($route);
+            Army::where('id',$id)->update(["moving"=>$route]);
+        }
+    }
+    public function deleteArmy(Request $request) {
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        $army = Fleet::where(["id"=>$request->input('id')])->first()->toArray();
+        if (($privilege == 2 && $army['owner'] == $country) || $privilege <= 1) {
+            Army::where(["id"=>$army['id']])->delete();
         }
     }
 }

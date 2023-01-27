@@ -109,6 +109,29 @@ function shipTrans(f1,id,f2) {
         location.reload();
     });
 }
+function changeArmyName(id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    name=$("#armyName-"+id).val();
+    $.post('/Action/ChangeArmyName',{
+        id : id,
+        name : name,
+    },function () {});
+}
+function moveArmy(id,target) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/MoveArmy',{
+        id : id,
+        target : target
+    },function () {});
+}
 function fleetDelete() {
     $.ajaxSetup({
         headers: {
@@ -117,6 +140,18 @@ function fleetDelete() {
     });
     $.post('/Action/FleetDelete', {
         id: nowControlling,
+    },function(data) {
+        location.reload();
+    });
+}
+function deleteArmy(id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/ArmyDelete', {
+        id: id,
     },function(data) {
         location.reload();
     });
