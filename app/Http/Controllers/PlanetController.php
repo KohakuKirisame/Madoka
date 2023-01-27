@@ -460,7 +460,7 @@ class PlanetController extends Controller {
             $districts = json_decode($planet->districts, true);
             $isExisted = false;
             foreach ($districts as $key => $value) {
-                if ($district == $value['name'] && $value['ownership'] == 3) {
+                if ($district == $value['name'] && $value['ownership'] == 2) {
                     $districts[$key]['size'] += 1;
                     $districts[$key]['cash'] += 200;
                     $isExisted = true;
@@ -468,11 +468,36 @@ class PlanetController extends Controller {
                 }
             }
             if (!$isExisted) {
-                $districts[] = ["name" => $district, "size" => 1, "cash" => 200, "ownership" => 3, "profit" => 0,
+                $districts[] = ["name" => $district, "size" => 1, "cash" => 200, "ownership" => 2, "profit" => 0,
                     "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []]];
             }
-
-
+        }
+        $planet->districts = json_encode($districts,JSON_UNESCAPED_UNICODE);
+        $planet->save();
+//        Planet::where(["id" => $id])->update(["districts" => $planet->districts]);
+    }
+    public function buildMarketDistrict(Request $request) {
+        $uid = $request->session()->get('uid');
+        $User =User::where('uid',$uid)->first();
+        $privilege = $User->privilege;
+        $id = $request->input('id');
+        $district = $request->input('district');
+        $planet = Planet::where(["id" => $id])->first();
+        $owner = $planet->owner;
+        if ($privilege <= 1) {
+            $districts = json_decode($planet->districts, true);
+            $isExisted = false;
+            foreach ($districts as $key => $value) {
+                if ($district == $value['name'] && $value['ownership'] == 0) {
+                    $districts[$key]['size'] += 1;
+                    $isExisted = true;
+                    break;
+                }
+            }
+            if (!$isExisted) {
+                $districts[] = ["name" => $district, "size" => 1, "cash" => 200, "ownership" => 0, "profit" => 0,
+                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []]];
+            }
         }
         $planet->districts = json_encode($districts,JSON_UNESCAPED_UNICODE);
         $planet->save();

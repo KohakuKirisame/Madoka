@@ -56,6 +56,7 @@ Route::prefix("Action")->group(function () {
     Route::post("/ChangePlanetName", [PlanetController::class, "changePlanetName"])->middleware("isAuthedByReimu");
     Route::post("/ChangeSize", [PlanetController::class, "changeSize"])->middleware("isAuthedByReimu");
     Route::post("/BuildDistrict", [PlanetController::class, "buildDistrict"])->middleware("isAuthedByReimu");
+    Route::post("/BuildMarketDistrict", [PlanetController::class, "buildMarketDistrict"])->middleware("isAuthedByReimu");
     Route::post("/ReadFleet", [MilitaryController::class, "readFleet"])->middleware("isAuthedByReimu");
     Route::post("/ChangeFleetName", [MilitaryController::class, "changeFleetName"])->middleware("isAuthedByReimu");
     Route::post("/ChangeShipName", [MilitaryController::class, "changeShipName"])->middleware("isAuthedByReimu");

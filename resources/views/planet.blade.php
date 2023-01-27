@@ -134,6 +134,25 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="newMarketDistrictModal" tabindex="-1" aria-labelledby="newMarketDistrictModalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新建市场区划</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @foreach($districts as $district)
+                        <button type="button" class="btn btn-light" onclick="buildMarketDistrict('{{$district['name']}}')">{{$district['name']}}</button>
+                    @endforeach
+                </div>
+                <div class="modal-footer">
+                    <div id="adminButton"></div>
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" href="#planetModel">返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endif
 </body>
 </html>

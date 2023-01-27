@@ -47,6 +47,17 @@ function buildDistrict(district) {
         district : district,
     },function() {});
 }
+function buildMarketDistrict(district) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/BuildMarketDistrict',{
+        id : nowControlling,
+        district : district,
+    },function() {});
+}
 function readPlanet(id,privilege){
     $.ajaxSetup({
         headers: {
@@ -108,6 +119,7 @@ function readPlanet(id,privilege){
         $("#adminButton").empty();
         if (privilege == 0 || privilege == 1) {
             $("#adminButton").append("<button type=\"button\" class=\"btn btn-primary\" data-bs-target=\"#newPopModal\" data-bs-toggle=\"modal\" data-bs-dismiss=\"modal\">新建人口</button>");
+            $("#adminButton").append("<button type=\"button\" class=\"btn btn-primary\" data-bs-target=\"#newMarketDistrictModal\" data-bs-toggle=\"modal\" data-bs-dismiss=\"modal\">新建市场区划</button>");
         }
     });
     const planetModal = new bootstrap.Modal("#planetModal");
