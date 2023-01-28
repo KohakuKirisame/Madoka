@@ -267,7 +267,7 @@
     </div>
 </div>
 <div class="modal fade" id="mapForMoveModal" tabindex="-1" aria-labelledby="mapForMoveLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">选择目标</h5>
