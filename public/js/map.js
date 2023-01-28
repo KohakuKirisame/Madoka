@@ -24,3 +24,27 @@ function newPlanet(id,type) {
 
     })
 }
+function colonize(id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/Colonize',{
+        id : id,
+    },function(data) {
+        location.reload();
+    });
+}
+function setTradeHub(id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/SetTradeHub',{
+        id : id,
+    },function(data) {
+        location.reload();
+    });
+}

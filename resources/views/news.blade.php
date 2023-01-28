@@ -22,7 +22,7 @@
 	<div class="row justify-content-start">
 		<a class="btn btn-lg col-12 btn-primary my-3" href="/News/New">新建舆情</a>
 		@foreach($news as $new)
-			@if($privilege<=1 || $new["status"]==1 || $new["media"]==$user["media"] || $new["editor"]==$user["uid"])
+			@if($privilege<=1 || $new["status"]==1 || ($new["media"]==$user["media"]&&$new["media"]!=0) || $new["editor"]==$user["uid"])
 				<div class="col-12 my-3">
 					<div class="card shadow-lg @if($new["type"]!=1) linkb @endif" >
 						<div class="card-body" @if($new["type"]!=1) onclick="window.open('/News/{{$new["id"]}}','_blank')" @endif>

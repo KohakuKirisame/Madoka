@@ -20,7 +20,7 @@
     <div class="card">
         <div class="card-body">
             <h5 class="card-title my-3">
-                <span class="badge @if($news["type"]==0) bg-primary @elseif($news["type"]==1) bg-success @endif" >@if($news["type"]==0)报道 @elseif($news["type"]==1)简讯 @endif</span>
+                <span class="badge @if($news["type"]==0) bg-primary @elseif($news["type"]==1) bg-success @elseif($news["type"]==2) bg-danger @endif" >@if($news["type"]==0)报道 @elseif($news["type"]==1)简讯 @elseif($news["type"]==2)声明 @endif</span>
             </h5>
             <div class="mx-4 markdown-body">@parsedown($news["content"])</div>
             <div class="my-3">

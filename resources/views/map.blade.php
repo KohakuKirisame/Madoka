@@ -42,34 +42,34 @@
             @endphp
         @endif
         @if ($privilege == 0 || $privilege == 1)
-            <button type='button' class='btn btn-default dropdown-toggle'
-                    style='position: absolute;
-                            top: {{$y-20}}px; left: {{$x+13.75}}px; width: 20px;height: 20px;
-                            border-radius: 100%;
-                            background-color:hsla(0,0%,0%,0.00);
-                            border:none ;
-                            padding:0px 0px'
-                    id='PlanetMenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
-                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
-                @if($stars[$i]['havePlanet'] == 1)
-                    @foreach($planets as $planet)
-                        @php
-                            if ($stars[$i]['id'] == $planet['position']) {
-                                $img = $planet['type'];
-                            }
-                        @endphp
-                    @endforeach
-                    <img src='storage/img/planets/{{$img}}.png' width='20px'>
-                @endif
-            </button>
-            <ul class='dropdown-menu' aria-labelledby='PlanerMenuLink-{{$stars[$i]['id']}}' id='star-Planet-{{$stars[$i]['id']}}'>
-                <li><a class='dropdown-item' onclick='newPlanet({{$stars[$i]['id']}},"")'>无</a></li>
-                @for ($j=0; $j < count($planetTypes); $j++)
-                    <li><a class='dropdown-item'
-                           onclick='newPlanet({{$stars[$i]['id']}},"{{$planetTypes[$j]['name']}}")'>{{$planetTypes[$j]['localization']}}</a>
-                    </li>
-                @endfor
-            </ul>
+            @if($stars[$i]['havePlanet'] == 1)
+                <button type='button' class='btn btn-default dropdown-toggle'
+                        style='position: absolute;
+                                top: {{$y-20}}px; left: {{$x+13.75}}px; width: 20px;height: 20px;
+                                border-radius: 100%;
+                                background-color:hsla(0,0%,0%,0.00);
+                                border:none ;
+                                padding:0px 0px'
+                        id='PlanetMenuLink-{{$stars[$i]['id']}}' data-bs-toggle='dropdown' aria-expanded='false'
+                        data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+                        @foreach($planets as $planet)
+                            @php
+                                if ($stars[$i]['id'] == $planet['position']) {
+                                    $img = $planet['type'];
+                                }
+                            @endphp
+                        @endforeach
+                        <img src='storage/img/planets/{{$img}}.png' width='20px'>
+                </button>
+                <ul class='dropdown-menu' aria-labelledby='PlanerMenuLink-{{$stars[$i]['id']}}' id='star-Planet-{{$stars[$i]['id']}}'>
+                    <li><a class='dropdown-item' onclick='newPlanet({{$stars[$i]['id']}},"")'>无</a></li>
+                    @for ($j=0; $j < count($planetTypes); $j++)
+                        <li><a class='dropdown-item'
+                               onclick='newPlanet({{$stars[$i]['id']}},"{{$planetTypes[$j]['name']}}")'>{{$planetTypes[$j]['localization']}}</a>
+                        </li>
+                    @endfor
+                </ul>
+            @endif
             <button type='button' class='btn btn-default dropdown-toggle'
                     style='position: absolute;
                             top: {{$y-13.75}}px; left: {{$x-13.75}}px; width: 27.5px;height: 27.5px;
@@ -106,86 +106,34 @@
                     </li>
                 @endfor
             </ul>
-            <button type='button' class='btn btn-default'
-                    style='position: absolute;
-                top: {{$y-20}}px; left: {{$x+10}}px; width: 20px;height: 20px;
-                border-radius: 100%;
-                background-color:hsla(0,0%,0%,0.00);
-                border:none ;
-                padding:0px 0px'
-                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
-                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
-                @if($stars[$i]['isTradeHub'] == 1)
-                    <img src='storage/img/trade.png' width='17.5px' />
-                @endif
-            </button>
-            <button type='button' class='btn btn-default'
-                    style='position: absolute;
-                    top: {{$y}}px; left: {{$x+10}}px; width: 20px;height: 20px;
-                    border-radius: 100%;
-                    background-color:hsla(0,0%,0%,0.00);
-                    border:none ;
-                    padding:0px 0px'
-                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
-                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
-                @if($stars[$i]['isCapital'] == 1)
-                    <img src='storage/img/capital.png' width='17.5px' />
-                @endif
-            </button>
-            @else
-            <button type='button' class='btn btn-default'
-                    style='position: absolute;
-                        top: {{$y-20}}px; left: {{$x+13.75}}px; width: 20px;height: 20px;
-                        border-radius: 100%;
-                        background-color:hsla(0,0%,0%,0.00);
-                        border:none ;
-                        padding:0px 0px'
-                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
-                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
-                @if($stars[$i]['havePlanet'] == 1)
-                    @php
-                        $ownered = False;
-                        foreach($planets as $planet) {
-                            if ($stars[$i]['id'] == $planet['position']) {
-                                $img = $planet['type'];
-                                if ($planet['controller'] != '') {
-                                    $ownered = true;
-                                }
-								break;
+        @else
+            @if($stars[$i]['havePlanet'] == 1)
+                @php
+                    $ownered = False;
+                    foreach($planets as $planet) {
+                        if ($stars[$i]['id'] == $planet['position']) {
+                            $img = $planet['type'];
+                            if ($planet['controller'] != '') {
+                                $ownered = true;
                             }
-						}
-                    @endphp
-                    @if(!$ownered)
-                        <img src='storage/img/planets/{{$img}}.png' width='20px' />
-                    @endif
+                            break;
+                        }
+                    }
+                @endphp
+                @if (!$ownered)
+                <button type='button' class='btn btn-default'
+                        style='position: absolute;
+                            top: {{$y-20}}px; left: {{$x+13.75}}px; width: 20px;height: 20px;
+                            border-radius: 100%;
+                            background-color:hsla(0,0%,0%,0.00);
+                            border:none ;
+                            padding:0px 0px'
+                        id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
+                        data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
+                    <img src='storage/img/planets/{{$img}}.png' width='20px' onclick="colonize({{$planet['id']}})"/>
+                </button>
                 @endif
-            </button>
-            <button type='button' class='btn btn-default'
-                    style='position: absolute;
-                    top: {{$y-20}}px; left: {{$x+10}}px; width: 20px;height: 20px;
-                    border-radius: 100%;
-                    background-color:hsla(0,0%,0%,0.00);
-                    border:none ;
-                    padding:0px 0px'
-                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
-                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
-                @if($stars[$i]['isTradeHub'] == 1)
-                    <img src='storage/img/trade.png' width='17.5px' />
-                @endif
-            </button>
-            <button type='button' class='btn btn-default'
-                    style='position: absolute;
-                top: {{$y}}px; left: {{$x+10}}px; width: 20px;height: 20px;
-                border-radius: 100%;
-                background-color:hsla(0,0%,0%,0.00);
-                border:none ;
-                padding:0px 0px'
-                    id='Planet-{{$stars[$i]['id']}}' aria-expanded='false'
-                    data-bs-target='#star-Planet-{{$stars[$i]['id']}}'>
-                @if($stars[$i]['isCapital'] == 1)
-                    <img src='storage/img/capital.png' width='17.5px' />
-                @endif
-            </button>
+            @endif
             <button type='button' class='btn btn-default'
                               style='position: absolute;
                     top: {{$y-13.75}}px; left: {{$x-13.75}}px; width: 27.5px;height: 27.5px;
@@ -228,6 +176,76 @@
                 @endif
             </button>
         @endif
+        <button type='button' class='btn btn-default'
+                style='position: absolute;
+                top: {{$y-25}}px; left: {{$x+10}}px; width: 20px;height: 20px;
+                border-radius: 100%;
+                background-color:hsla(0,0%,0%,0.00);
+                border:none ;
+                padding:0px 0px' onclick="setTradeHub({{$stars[$i]['id']}})">
+            @if($stars[$i]['isTradeHub'] == 1)
+                <img src='storage/img/trade.png' width='17.5px' />
+            @endif
+        </button>
+        <button type='button' class='btn btn-default'
+                style='position: absolute;
+            top: {{$y}}px; left: {{$x+10}}px; width: 20px;height: 20px;
+            border-radius: 100%;
+            background-color:hsla(0,0%,0%,0.00);
+            border:none ;
+            padding:0px 0px'>
+            @if($stars[$i]['isCapital'] == 1)
+                <img src='storage/img/capital.png' width='17.5px' />
+            @endif
+        </button>
+        @foreach($fleets as $key=>$value)
+            @if($value['position'] == $stars[$i]['id'])
+                <button class='btn btn-default'
+                    style='position: absolute;
+                        top: {{$y-25}}px; left: {{$x-30}}px; width: 20px;height: 20px;
+                        border-radius: 100%;
+                        background-color:hsla(0,0%,0%,0);
+                        border:none ;
+                        padding:0px 0px'
+                    data-bs-toggle='popover'
+                    data-bs-trigger='hover'
+                    data-bs-placement='top'
+                    data-bs-container ='body'
+                    data-bs-html='true'
+                    title={{$value['name']}}
+                    data-bs-content='隶属于{{$value['owner']}}'>
+                    @if($value['owner'] == $country)
+                        <img src='storage/img/military/fleet_green.png' width='20px' />
+                        @else
+                        <img src='storage/img/military/fleet_red.png' width='20px' />
+                    @endif
+                </button>
+            @endif
+        @endforeach
+        @foreach($armys as $key=>$value)
+            @if($value['position'] == $stars[$i]['id'])
+                <button class='btn btn-default'
+                        style='position: absolute;
+                    top: {{$y-25}}px; left: {{$x-30}}px; width: 20px;height: 20px;
+                    border-radius: 100%;
+                    background-color:hsla(0,0%,0%,0.00);
+                    border:none ;
+                    padding:0px 0px'
+                        data-bs-toggle='popover'
+                        data-bs-trigger='hover'
+                        data-bs-placement='top'
+                        data-bs-container ='body'
+                        data-bs-html='true'
+                        title={{$value['name']}}
+                data-bs-content='隶属于{{$value['owner']}}'>
+                    @if($value['owner'] == $country)
+                        <img src='storage/img/military/army_green.png' width='20px' />
+                    @else
+                        <img src='storage/img/military/army_red.png' width='20px' />
+                    @endif
+                </button>
+            @endif
+        @endforeach
     @endfor
     </div>
     <canvas id="canvas_1">

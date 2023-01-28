@@ -98,7 +98,7 @@
                     <p class="col-2 text-center">{{$army['damage']}}</p>
                     <p class="col-2 text-center">{{$army['HP']}}</p>
                     <p class="col-2 text-center">
-                        <button class="btn btn-primary" type="button" onclick="moveArmy({{$army['id']}})">移动</button>
+                        <button class="btn btn-primary" type="button" data-bs-target="#mapForMoveModal" data-bs-toggle="modal" data-bs-dismiss="modal" onclick="moveArmy({{$army['id']}})">移动</button>
                         <button class="btn btn-danger" type="button" onclick="deleteArmy({{$army['id']}})">解散</button>
                     </p>
                 </div>
@@ -121,13 +121,13 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item">
                                 <div class="row">
-                                    <h7 class="col text-center">船体</h7>
-                                    <h7 class="col text-center">能量伤害</h7>
-                                    <h7 class="col text-center">动能伤害</h7>
-                                    <h7 class="col text-center">装甲</h7>
-                                    <h7 class="col text-center">护盾</h7>
-                                    <h7 class="col text-center">闪避</h7>
-                                    <h7 class="col text-center">速度</h7>
+                                    <h6 class="col text-center">船体</h6>
+                                    <h6 class="col text-center">能量伤害</h6>
+                                    <h6 class="col text-center">动能伤害</h6>
+                                    <h6 class="col text-center">装甲</h6>
+                                    <h6 class="col text-center">护盾</h6>
+                                    <h6 class="col text-center">闪避</h6>
+                                    <h6 class="col text-center">速度</h6>
                                 </div>
                             </li>
                             <li class="list-group-item">
@@ -153,13 +153,16 @@
                             </div>
                         </div>
                         <div class="row my-4 py-4">
-                            <div class="col-4">
-                                <button type="button" class="btn btn-light" data-bs-target="#fleetMergeModal" data-bs-toggle="modal" data-bs-dismiss="modal" onclick="getFleets('merge')">合并舰队</button>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-success" data-bs-target="#mapForMoveModal" data-bs-toggle="modal" data-bs-dismiss="modal" onclick="moveFleet()">移动舰队</button>
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
+                                <button type="button" class="btn btn-primary" data-bs-target="#fleetMergeModal" data-bs-toggle="modal" data-bs-dismiss="modal" onclick="getFleets('merge')">合并舰队</button>
+                            </div>
+                            <div class="col-3">
                                 <button type="button" class="btn btn-light" data-bs-target="#shipTransModal" data-bs-toggle="modal" data-bs-dismiss="modal">转移舰船</button>
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
                                 <button type="button" class="btn btn-danger" data-bs-target="#fleetDeleteModal" data-bs-toggle="modal" data-bs-dismiss="modal">删除舰队</button>
                             </div>
                         </div>
@@ -171,9 +174,7 @@
             </div>
             <div class="modal-footer">
                 <div id="adminButton"></div>
-                @if($privilege <= 1)
-                    <button type="button" class="btn btn-primary" data-bs-target="#newShipModal" data-bs-toggle="modal" data-bs-dismiss="modal">新建船只</button>
-                @endif
+                <button type="button" class="btn btn-primary" data-bs-target="#newShipModal" data-bs-toggle="modal" data-bs-dismiss="modal">新建船只</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
@@ -271,14 +272,37 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">选择目标</h5>
+                <div id="moveType"></div>
+                <div id="moveID"></div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="container-fluid" style="height: 85%">
-                    <iframe src="/MapContent" class="w-100 h-100">
-
+                <div class="container-fluid" style="height: 100%">
+                    <iframe src="/MapForMoveContent" class="w-100 h-100">
                     </iframe>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <h6>请输入目的地</h6>
+                <div class="row">
+                    <input type="text" class="form-control col-2" id="moveTarget" value="" placeholder="推荐点击星系以复制名称"/>
+                </div>
+                <button type="button" class="btn btn-success" data-bs-dismiss="model" onclick="moveTarget()" >确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="newShipModal" tabindex="-1" aria-labelledby="newShipModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新建船只</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @foreach($shipTypes as $type)
+                    <button type="button" class="btn btn-light" onclick="newShip('{{$type['type']}}')">{{$type['name']}}</button>
+                @endforeach
             </div>
             <div class="modal-footer">
                 <div id="adminButton"></div>
@@ -287,26 +311,5 @@
         </div>
     </div>
 </div>
-@if($privilege <= 1)
-    <div class="modal fade" id="newShipModal" tabindex="-1" aria-labelledby="newShipModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">新建船只</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    @foreach($shipTypes as $type)
-                        <button type="button" class="btn btn-light" onclick="adminNewShip('{{$type['type']}}')">{{$type['name']}}</button>
-                    @endforeach
-                </div>
-                <div class="modal-footer">
-                    <div id="adminButton"></div>
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" href="#fleetModel">返回</button>
-                </div>
-            </div>
-        </div>
-    </div>
-@endif
 </body>
 </html>

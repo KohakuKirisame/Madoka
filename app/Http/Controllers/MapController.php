@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Army;
 use App\Models\Country;
+use App\Models\Fleet;
 use App\Models\Star;
 use App\Models\User;
 use App\Models\Station;
@@ -12,6 +14,39 @@ use Illuminate\Http\Request;
 
 class MapController extends Controller {
     public function getData(Request $request) {
+        $uid=$request->session()->get("uid");
+        if(User::where("uid",$uid)->exists()) {
+            $user = User::where("uid", $uid)->first();
+            $privilege = $user->privilege;
+            $country = $user->country;
+            if (!is_null($privilege)) {
+                $stars = Star::get()->toArray();
+                foreach ($stars as $key => $value) {
+                    $stars[$key]['resource'] = json_decode($value['resource'], true);
+                }
+                $countries = Country::get()->toArray();
+                $stations = Station::get()->toArray();
+                $planets = Planet::get()->toArray();
+                $planetTypes = PlanetType::get()->toArray();
+                if ($privilege <= 1) {
+                    $fleets = Fleet::get()->toArray();
+                    $armys = Army::get()->toArray();
+                } elseif ($privilege >=2) {
+                    $fleets = Fleet::where(["owner"=>$country])->get()->toArray();
+                    $armys = Army::where(["owner"=>$country])->get()->toArray();
+                }
+                return view("map",["stars"=>$stars,"countrys"=>$countries,
+                    "stations"=>$stations,"planets"=>$planets,
+                    "planetTypes"=>$planetTypes,
+                    "fleets"=>$fleets,
+                    "armys"=>$armys,
+                    "privilege"=>$privilege]);
+            }
+        }else {
+            return redirect("https://kanade.nbmun.cn");
+        }
+    }
+    public function getDataForMove(Request $request) {
         $uid=$request->session()->get("uid");
         if(User::where("uid",$uid)->exists()) {
             $privilege = User::where("uid", $uid)->first()->privilege;
@@ -24,7 +59,7 @@ class MapController extends Controller {
                 $stations = Station::get()->toArray();
                 $planets = Planet::get()->toArray();
                 $planetTypes = PlanetType::get()->toArray();
-                return view("map",["stars"=>$stars,"countrys"=>$countries,
+                return view("mapformove",["stars"=>$stars,"countrys"=>$countries,
                     "stations"=>$stations,"planets"=>$planets,
                     "planetTypes"=>$planetTypes,
                     "privilege"=>$privilege]);
@@ -119,6 +154,38 @@ class MapController extends Controller {
             }
         }else {
             return redirect("https://kanade.nbmun.cn");
+        }
+    }
+    public function setTradeHub(Request $request) {
+        $uid = $request->session()->get('uid');
+        $user= UserController::GetInfo($uid);
+        if(key_exists('Err',$user)){
+            return redirect('/Action/Logout');
+        }
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        $id = $request->input('id');
+        $star = Star::where(["id"=>$id])->first();
+        $Country = Country::where(["tag"=>$country])->first();
+        if ($star->owner == $country) {
+            if ($star->isTradeHub == 1) {
+                $star->isTradeHub = 0;
+                $star->save();
+            } else {
+                $hubs = intval(1+count(json_decode($Country->planets))/3);
+                $stars = Star::where(["owner"=>$country])->get()->toArray();
+                $i = 0;
+                foreach ($stars as $item){
+                    if ($item['isTradeHub'] == 1) {
+                        $i++;
+                    }
+                }
+                if ($i < $hubs) {
+                    $star->isTradeHub = 1;
+                    $star->save();
+                }
+            }
         }
     }
 

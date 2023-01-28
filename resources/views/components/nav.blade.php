@@ -18,11 +18,17 @@
 				<li class="nav-item">
 					<a class="nav-link" href="/Military">军事</a>
 				</li>
-				<li class="nav-item">
+				<!--<li class="nav-item">
 					<a class="nav-link" href="/ForeignAffairs">外交</a>
-				</li>
+				</li>-->
                 <li class="nav-item">
                     <a class="nav-link" href="/News">舆情</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Technology">科研</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Market">市场</a>
                 </li>
 				<!--<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

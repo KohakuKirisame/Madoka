@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Army;
 use App\Models\Country;
 use App\Models\Definition;
 use App\Models\Planet;
@@ -99,9 +100,64 @@ class PlanetController extends Controller {
         }
     }
     //主权变更//
-    function colonize($owner) {
-        Planet::where(["id"=>$this->id])->update(["owner"=>$owner,"controller"=>$owner]);
-        echo "殖民地信息已更新\n";
+    public function colonize(Request $request) {
+        $uid = $request->session()->get('uid');
+        $user= UserController::GetInfo($uid);
+        if(key_exists('Err',$user)){
+            return redirect('/Action/Logout');
+        }
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        $id = $request->input('id');
+        $planet = Planet::where(["id"=>$id])->first();
+        $star = Star::where(["id"=>$planet->position])->first();
+        $rights = json_decode(Country::where(["tag"=>$id])->first()->species,true);
+        foreach ($rights as $specie) {
+            if ($specie['right'] == 1) {
+                $species = $specie['name'];
+                break;
+            }
+        }
+        if ($star->owner == $country) {
+            $planet->owner = $country;
+            $planet->controller = $country;
+            $pop1 = new Population();
+            $pop1->species = $species;
+            $pop1->position = $id;
+            $pop1->job = '无';
+            $pop1->class = 'low';
+            $pop1->workat = '无';
+            $pop1->ethic = '';
+            $pop1->ig = '';
+            $pop1->party = '';
+            $pop1->cash = 20;
+            $pop1->struggle = 0;
+            $pop1->save();
+            $pop2 = new Population();
+            $pop2->species = $species;
+            $pop2->position = $id;
+            $pop2->job = '无';
+            $pop2->class = 'low';
+            $pop2->workat = '无';
+            $pop2->ethic = '';
+            $pop2->ig = '';
+            $pop2->party = '';
+            $pop2->cash = 20;
+            $pop2->struggle = 0;
+            $pop2->save();
+            $pops = [$pop1->id,$pop2->id,];
+            $planet->pops = json_encode($pops,JSON_UNESCAPED_UNICODE);
+            $planet->save();
+            $country = Country::where(["tag"=>$country])->first();
+            $planets = json_decode($country->planets,true);
+            $planets[] = $planet->id;
+            $country->planets = json_encode($planets,JSON_UNESCAPED_UNICODE);
+            $country->save();
+            $market = new MarketController($country->tag);
+            $market->planets[] = $planet->$id;
+            $market->UpdateMarket();
+        }
     }
     function beOccupied($controller) {
         Planet::where(["id"=>$this->id])->update(["controller"=>$controller]);
@@ -161,14 +217,14 @@ class PlanetController extends Controller {
                         foreach ($value2 as $key3 => $value3) {
                             $pop = Population::where(["id" => $value3])->first();
                             $cash = $pop->cash;
-                            $speciesType = Species::where(["name"=>$pop->species])->first()->type;
+                            $speciesType = Species::where(["name" => $pop->species])->first()->type;
                             if ($speciesType == 'robot') {
                                 $this->product['country']['energy'] -= 1;
                                 continue;
                             }
-                            $cash += 1 * 2.5*$market->goods['consume_goods']['price'];
-                            $cash -= $lowTax * 1 * 2.5*$market->goods['consume_goods']['price'];
-                            Population::where(["id" => $value3])->update("cash", $cash);
+                            $cash += 1 * 2.5 * $market->goods['consume_goods']['price'];
+                            $cash -= $lowTax * 1 * 2.5 * $market->goods['consume_goods']['price'];
+                            Population::where(["id" => $value3])->update(["cash" => $cash]);
                         }
                     }
                 }
@@ -444,9 +500,13 @@ class PlanetController extends Controller {
         foreach ($profitArray as $key => $value) {
             $disData = District::where(["name" => $key])->first();
             if ($disData->buildCost <= $country->cashPool && ($sizeAll+1)<=$this->size) {
-                $this->districts[$key]['size'] += 1;
-                $country->cashPool -= $disData->buildCost;
-                break;
+                foreach ($this->districts as $key2=>$value2) {
+                    if ($value2['name'] == $key) {
+                        $this->districts[$key2]['size'] += 1;
+                        $country->cashPool -= $disData->buildCost;
+                        break 2;
+                    }
+                }
             }
         }
         $this->updatePlanet();
@@ -482,7 +542,7 @@ class PlanetController extends Controller {
             }
             if (!$isExisted) {
                 $districts[] = ["name" => $district, "size" => 1, "cash" => 200, "ownership" => 2, "profit" => 0,
-                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []],"pruduct"=>["zro"=>0,"gases"=>0, "grain"=>0, "motes"=>0, "satra"=>0, "alloys"=>0, "crystals"=>0, "minerals"=>0, "consume_goods"=>0]];
+                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []],"product"=>["zro"=>0,"gases"=>0, "grain"=>0, "motes"=>0, "satra"=>0, "alloys"=>0, "crystals"=>0, "minerals"=>0, "consume_goods"=>0]];
             }
         }
         $planet->districts = json_encode($districts,JSON_UNESCAPED_UNICODE);
@@ -509,7 +569,7 @@ class PlanetController extends Controller {
             }
             if (!$isExisted) {
                 $districts[] = ["name" => $district, "size" => 1, "cash" => 200, "ownership" => 0, "profit" => 0,
-                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []],"pruduct"=>["zro"=>0,"gases"=>0, "grain"=>0, "motes"=>0, "satra"=>0, "alloys"=>0, "crystals"=>0, "minerals"=>0, "consume_goods"=>0]];
+                    "jobs" => ["upJob" => [], "midJob" => [], "lowJob" => []],"product"=>["zro"=>0,"gases"=>0, "grain"=>0, "motes"=>0, "satra"=>0, "alloys"=>0, "crystals"=>0, "minerals"=>0, "consume_goods"=>0]];
             }
         }
         $planet->districts = json_encode($districts,JSON_UNESCAPED_UNICODE);
@@ -612,7 +672,7 @@ class PlanetController extends Controller {
             return 0;
         }
     }
-
+    //////////
     public function planetPage(Request $request){
         $uid = $request->session()->get('uid');
         $User =User::where('uid',$uid)->first();
@@ -669,7 +729,7 @@ class PlanetController extends Controller {
         $pops = [];
         foreach ($planet['pops'] as $pop) {
             $pop = Population::where('id',$pop)->first();
-            $pops[] = [$pop->speicels,$pop->job,];
+            $pops[] = [$pop->species,$pop->job,];
         }
         $output=["name"=>$planet["name"],"districts"=>$planet['districts'],"pops"=>$pops,"product"=>$planet['product']];
         $output = json_encode($output,JSON_UNESCAPED_UNICODE);
@@ -689,5 +749,58 @@ class PlanetController extends Controller {
         $id = $request->input('id');
         $name = $request->input("name");
         Planet::where('id', $id)->update(["name"=>$name]);
+    }
+    public function buildArmy(Request $request) {
+        $uid = $request->session()->get('uid');
+        $user= UserController::GetInfo($uid);
+        if(key_exists('Err',$user)){
+            return redirect('/Action/Logout');
+        }
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $id = $request->input('id');
+        $planet = Planet::where(["id"=>$id])->first();
+        $army = Army::where('position',$planet->position)->first();
+        if ($privilege <= 1) {
+            $Country = Country::where('tag', $planet->owner)->first();
+            if (is_null($army)) {
+                $armyNew = new Army();
+                $armyNew->position = $planet->position;
+                $armyNew->name = $planet->name.'特遣队';
+                $armyNew->owner = $planet->owner;
+                $armyNew->quantity = 1;
+                $armyNew->HP = 100*(1+$Country->armyHPModifier);
+                $armyNew->damage = 10*(1+$Country->armyDamageModifier);
+                $armyNew->moving ='[]';
+                $armyNew->save();
+            } else {
+                $army->quantity += 1;
+                $army->HP *= 2;
+                $army->damage *= 2;
+                $army->save();
+            }
+        } elseif ($privilege ==2) {
+            $country = $MadokaUser->country;
+            $Country = Country::where('tag', $country)->first();
+            if ($country= $planet->owner) {
+                $Country->energy -= 100;
+                if (is_null($army)) {
+                    $armyNew = new Army();
+                    $armyNew->position = $planet->position;
+                    $armyNew->name = $planet->name.'特遣队';
+                    $armyNew->owner = $planet->owner;
+                    $armyNew->quantity = 1;
+                    $armyNew->HP = 100*(1+$Country->armyHPModifier);
+                    $armyNew->damage = 10*(1+$Country->armyDamageModifier);
+                    $armyNew->moving ='[]';
+                    $armyNew->save();
+                } else {
+                    $army->quantity += 1;
+                    $army->HP *= 2;
+                    $army->damage *= 2;
+                    $army->save();
+                }
+            }
+        }
     }
 }

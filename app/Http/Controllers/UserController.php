@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Country;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -80,6 +81,26 @@ class UserController extends Controller {
         if (key_exists("Err",$user)){
             return redirect("/Action/Logout");
         }
-        return view("dashboard",["privilege"=>$privilege,"user"=>$user]);
+        if($privilege <= 1) {
+            $country = Country::where(["tag"=>"GSK"])->first()->toArray();
+        } elseif ($privilege == 2) {
+            $country = User::where("uid",$uid)->first()->country;
+            $country = Country::where(["tag"=>$country])->first()->toArray();
+        } else {
+            return redirect("/News");
+        }
+        $country['storage'] = json_decode($country['storage'],true);
+        $country['atWarWith'] = json_decode($country['atWarWith'],true);
+        foreach($country['atWarWith'] as $key=>$value) {
+            $country['atWarWith'][$key] = [$value,Country::where(["tag"=>$value])->first()->name];
+        }
+        $country['alliedWith'] = json_decode($country['alliedWith'],true);
+        foreach($country['alliedWith'] as $key=>$value) {
+            $country['alliedWith'][$key] = [$value,Country::where(["tag"=>$value])->first()->name];
+        }
+        $country['species'] = json_decode($country['species'],true);
+        $country['techs'] = json_decode($country['techs'],true);
+        return view("dashboard",["privilege"=>$privilege,"user"=>$user,
+            "country"=>$country]);
     }
 }

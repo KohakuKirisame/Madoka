@@ -7,38 +7,42 @@ use App\Models\Good;
 use App\Models\Market;
 use App\Models\Planet;
 use App\Models\Star;
+use App\Models\User;
 use App\Models\Station;
+use Illuminate\Http\Request;
 
 class MarketController extends Controller {
     public string $owner;
     public array $member,$planets,$trades,$goods;
-    function __construct($country) {
-        $m = Market::where(["owner"=>$country])->first();
-        $this->owner = $country;
-        echo $country;
-        if (is_null($m)) {
-            $result = Market::get();
-            foreach ($result as $item) {
-                $members = json_decode($item->member, true);
-                if (in_array($country,$members)) {
-                    $this->owner = $item->owner;
-                    break;
+    function __construct($country=-1) {
+        if($country!=-1) {
+
+            $m = Market::where(["owner" => $country])->first();
+            $this->owner = $country;
+            if (is_null($m)) {
+                $result = Market::get();
+                foreach ($result as $item) {
+                    $members = json_decode($item->member, true);
+                    if (in_array($country, $members)) {
+                        $this->owner = $item->owner;
+                        break;
+                    }
                 }
             }
-        }
-        $m = Market::where(["owner"=>$this->owner])->first();
-        $this->member = json_decode($m->member,true);
-        $this->planets = json_decode($m->planets,true);
-        $this->trades = json_decode($m->trades,true);
-        $this->goods = json_decode($m->goods,true);
-        $goods = Good::get()->toArray();
-        $goodsArray = [];
-        foreach ($this->goods as $key => $value) {
-            $goodsArray[] = $key;
-        }
-        foreach ($goods as $good) {
-            if (!in_array($good['name'], $goodsArray)) {
-                $this->goods = array_merge($this->goods,[$good['name']=>["demandOrder"=>0,"supplyOrder"=>0,"price"=>$good['basePrice'],"storage"=>0]]);
+            $m = Market::where(["owner" => $this->owner])->first();
+            $this->member = json_decode($m->member, true);
+            $this->planets = json_decode($m->planets, true);
+            $this->trades = json_decode($m->trades, true);
+            $this->goods = json_decode($m->goods, true);
+            $goods = Good::get()->toArray();
+            $goodsArray = [];
+            foreach ($this->goods as $key => $value) {
+                $goodsArray[] = $key;
+            }
+            foreach ($goods as $good) {
+                if (!in_array($good['name'], $goodsArray)) {
+                    $this->goods = array_merge($this->goods, [$good['name'] => ["demandOrder" => 0, "supplyOrder" => 0, "price" => $good['basePrice'], "storage" => 0]]);
+                }
             }
         }
     }
@@ -70,10 +74,10 @@ class MarketController extends Controller {
             if ($value['duration'] > 0) {
                 foreach ($value['content'] as $key2 => $value2) {
                     if ($value2 > 0 ) {
-                        $this->goods[$key2]['supplyOrder'] += $value2;
+                        $this->goods[$value2[0]]['supplyOrder'] += $value2;
                     }
                     else {
-                        $this->goods[$key2]['demandOrder'] -= $value2;
+                        $this->goods[$value2[0]]['demandOrder'] -= $value2;
                     }
                 }
             }
@@ -196,33 +200,31 @@ class MarketController extends Controller {
             }
         }
         $route = array_reverse($route);
-        $this->trades[] = ["target"=>$targetCountry,"content"=>[$resource=>$num],"path"=>$route,"duration"=>$duration];
+        $this->trades[] = ["target"=>$targetCountry,"content"=>[$resource,$num],"path"=>$route,"duration"=>$duration];
         $trade = json_encode($this->trades,JSON_UNESCAPED_UNICODE);
         Market::where(["owner"=>$this->owner])->update(["trades"=>$trade]);
     }
 
     function countTrade() {
-    $country = Country::where(["tag"=>$this->owner])->first();
+    $country = Country::where(["tag"=>$this->owner])->first()->toArray();
         foreach ($this->trades as $key => $value) {
             $targetMarket = new MarketController($value['target']);
             $target = Country::where(["tag"=>$value['target']])->first();
             if ($value['duration'] > 0) {
-                foreach ($value['content'] as $key2 => $value2) {
-                    if ($value2 > 0) {
-                        $price = $targetMarket->goods[$key2]['price']*$value2;
-                        $country->energy -= $price;
-                        if ($country->economyType == 1) {
-                            $country->storage = json_decode($country->storage, true);
-                            $country->storage[$key2] += $value2;
-                        }
+                if ($value['content'][1] > 0) {
+                    $price = $targetMarket->goods[$value['content'][0]]['price']*$value['content'][1];
+                    $country['energy'] -= $price;
+                    if ($country['economyType'] == 1) {
+                        $country['storage'] = json_decode($country['storage'], true);
+                        $country['storage'][$value['content'][0]] += $value['content'][1];
                     }
-                    else {
-                        $price = $this->goods[$key2]['price']*$value2;
-                        $country->energy += $price;
-                        if ($country->economyType == 1) {
-                            $country->storage = json_decode($country->storage, true);
-                            $country->storage[$key2] -= $value2;
-                        }
+                }
+                else {
+                    $price = $this->goods[$value['content'][0]]['price'] * $value['content'][1];
+                    $country->energy += $price;
+                    if ($country['economyType'] == 1) {
+                        $country['storage'] = json_decode($country['storage'], true);
+                        $country['storage'][$value['content'][0]] -= $value['content'][1];
                     }
                 }
                 $this->trades[$key]['duration'] -= 1;
@@ -234,6 +236,22 @@ class MarketController extends Controller {
             $this->UpdateMarket();
         }
     }
+    public function marketPage(Request $request){
+        $uid=$request->session()->get('uid');
+        $u = User::where(["uid"=>$uid])->first();
+        $user=UserController::GetInfo($uid);
+        if (in_array("Err",$user)){
+            return redirect("/Action/Logout");
+        }
+        $privilege = $u->privilege;
+        if ($privilege==0){
+            $country="GSK";
 
+        }else{
+            $country=$u->country;
+        }
+        $this->__construct($country);
+        return view("market",["user"=>$user,"market"=>$this,"privilege"=>$privilege]);
+    }
 }
 

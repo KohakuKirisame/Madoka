@@ -58,6 +58,17 @@ function buildMarketDistrict(district) {
         district : district,
     },function() {});
 }
+function buildArmy() {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/BuildArmy',{
+        id : nowControlling,
+    },function(data) {
+    });
+}
 function readPlanet(id,privilege){
     $.ajaxSetup({
         headers: {
@@ -102,9 +113,9 @@ function readPlanet(id,privilege){
         }
         $("#pops").empty();
         for (var key in data['pops']) {
-            $("#pops").append("<div class=\"card\" style=\"width: 50px;\">\n" +
+            $("#pops").append("<div class=\"card col-2\">\n" +
                 "                   <div class=\"card-body\">\n" +
-                "                       <h5 class=\"card-title\">"+data['pops'][key][0]+"</h5>" +
+                "                       <h7 class=\"card-title text-center\">"+data['pops'][key][0]+"</h7>" +
                 "                       <p class='text-center'>"+data['pops'][key][1]+"</p>" +
                 "                   </div>" +
                 "              </div> ");

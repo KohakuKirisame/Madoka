@@ -44,9 +44,11 @@
                 </div>
              <div class="col-12" id="media_select">
                  <div class="form-floating mb-3">
-                     <select class="form-select" id="media" name="media" aria-label="Floating label" @if($privilege>1) readonly @endif>
+                     <select class="form-select" id="media" name="media" aria-label="Floating label" @if($privilege>1) readonly="readonly" @endif>
                          @foreach($medias as $media)
+                             @if($privilege<=1||($privilege==3 && $media["id"]==$user["media"]))
                              <option value="{{$media["id"]}}" @if($user["media"]==$media["id"]) selected @endif>{{$media["name"]}}</option>
+                             @endif
                          @endforeach
                      </select>
                      <label for="type">媒体</label>

@@ -86,7 +86,9 @@
                     <div class="row">
                         <div class="col my-4 py-4">
                             <h6 class="text-center">人口</h6>
-                            <div class="container my-4" id="pops"></div>
+                            <div class="container my-4">
+                                <div class="row" id="pops"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -94,6 +96,7 @@
             <div class="modal-footer">
                 <div id="adminButton"></div>
                 @if($privilege != 3)
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="buildArmy()">招募陆军</button>
                     <button type="button" class="btn btn-primary" data-bs-target="#newDistrictModal" data-bs-toggle="modal" data-bs-dismiss="modal">新建区划</button>
                 @endif
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

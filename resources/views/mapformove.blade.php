@@ -107,8 +107,8 @@
                           data-bs-container ='body'
                           title={{$stars[$i]['name']}}
                           data-bs-html='true'
-                          data-bs-content='当前受控于{{$countryName}}
-                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="moveTarget({{$stars[$i]['id']}})">移动</button>'>
+                          data-bs-content='当前受控于{{$countryName}}'>
+
             @if($type == 'sc_black_hole' || $type == 'sc_pulsar' || $type == 'sc_neutron_star')
                 <img src='{{asset("storage/img/".$type.".png")}}' width='27.5px' />
             @endif

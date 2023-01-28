@@ -1,5 +1,5 @@
 var nowControlling=0;
-var type='';
+var type;
 var moveID=0;
 function changeFleetName(id) {
     $.ajaxSetup({
@@ -49,13 +49,13 @@ function changeFleetFTL(id) {
         FTL : FTL,
     },function() {});
 }
-function adminNewShip(type) {
+function newShip(type) {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
-    $.post('/Action/AdminNewShip',{
+    $.post('/Action/NewShip',{
         id : nowControlling,
         type : type,
     },function() {});
@@ -129,20 +129,33 @@ function moveArmy(id) {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
-    type = 'army';
-    moveID = id;
+    $("#moveType").html('army');
+    $("#moveID").html(id)
 }
-function moveTarget(target) {
+function moveFleet() {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    $("#moveType").html('fleet');
+    $("#moveID").html(nowControlling);
+}
+function moveTarget() {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    type = $("#moveType").text();
+    id = $("#moveID").text();
+    let target = $("#moveTarget").val();
     $.post('/Action/Move', {
         type: type,
-        id: moveID,
+        id: id,
         target : target,
     }, function (data) {
+        location.reload();
     })
 }
 function fleetDelete() {
@@ -198,6 +211,7 @@ function readFleet(id) {
     },function(data) {
         nowControlling = id;
         $('#shipList').empty();
+        $('#shipList2').empty();
         data = JSON.parse(data);
         $('#fleetName').html(data['name']);
         $('#hull').html(data['hull']);
