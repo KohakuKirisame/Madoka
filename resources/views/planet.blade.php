@@ -82,6 +82,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="container my-4 py-4 rounded shadow-lg">
+                    <div class="row">
+                        <div class="col my-4 py-4">
+                            <h6 class="text-center">人口</h6>
+                            <div class="container my-4" id="pops"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <div id="adminButton"></div>

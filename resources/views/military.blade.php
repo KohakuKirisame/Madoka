@@ -98,7 +98,7 @@
                     <p class="col-2 text-center">{{$army['damage']}}</p>
                     <p class="col-2 text-center">{{$army['HP']}}</p>
                     <p class="col-2 text-center">
-                        <button class="btn btn-primary" type="button" onclick="moveArmy({{$army['id']}},{{$privilege}})">移动</button>
+                        <button class="btn btn-primary" type="button" onclick="moveArmy({{$army['id']}})">移动</button>
                         <button class="btn btn-danger" type="button" onclick="deleteArmy({{$army['id']}})">解散</button>
                     </p>
                 </div>
@@ -262,6 +262,27 @@
                 <div id="adminButton"></div>
                 <button type="button" class="btn btn-success" data-bs-dismiss="model" onclick="newFleet({{$country}})">新建</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="model">返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="mapForMoveModal" tabindex="-1" aria-labelledby="mapForMoveLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">选择目标</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid" style="height: 85%">
+                    <iframe src="/MapContent" class="w-100 h-100">
+
+                    </iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="adminButton"></div>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" href="#fleetModel">返回</button>
             </div>
         </div>
     </div>

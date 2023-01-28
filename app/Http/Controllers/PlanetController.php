@@ -665,7 +665,13 @@ class PlanetController extends Controller {
         $planet = Planet::where('id',$id)->first()->toArray();
         $planet['districts'] = json_decode($planet['districts'],true);
         $planet['product'] = json_decode($planet['product'],true);
-        $output=["name"=>$planet["name"],"districts"=>$planet['districts'],"product"=>$planet['product']];
+        $planet['pops'] = json_decode($planet['pops'],true);
+        $pops = [];
+        foreach ($planet['pops'] as $pop) {
+            $pop = Population::where('id',$pop)->first();
+            $pops[] = [$pop->speicels,$pop->job,];
+        }
+        $output=["name"=>$planet["name"],"districts"=>$planet['districts'],"pops"=>$pops,"product"=>$planet['product']];
         $output = json_encode($output,JSON_UNESCAPED_UNICODE);
         return $output;
         //Here's to the crazy ones.

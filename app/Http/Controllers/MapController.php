@@ -49,7 +49,6 @@ class MapController extends Controller {
             return redirect("https://kanade.nbmun.cn");
         }
     }
-
     public function changeOwner(Request $request){
         $uid = $request->session()->get('uid');
         if(User::where("uid",$uid)->exists()) {

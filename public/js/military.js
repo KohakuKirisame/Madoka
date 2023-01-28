@@ -1,4 +1,6 @@
 var nowControlling=0;
+var type='';
+var moveID=0;
 function changeFleetName(id) {
     $.ajaxSetup({
         headers: {
@@ -121,16 +123,27 @@ function changeArmyName(id) {
         name : name,
     },function () {});
 }
-function moveArmy(id,target) {
+function moveArmy(id) {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
-    $.post('/Action/MoveArmy',{
-        id : id,
-        target : target
-    },function () {});
+    type = 'army';
+    moveID = id;
+}
+function moveTarget(target) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/Move', {
+        type: type,
+        id: moveID,
+        target : target,
+    }, function (data) {
+    })
 }
 function fleetDelete() {
     $.ajaxSetup({

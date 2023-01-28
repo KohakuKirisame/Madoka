@@ -39,6 +39,7 @@ Route::get('/Login',function () {
 
 Route::get('/Map',[MapController::class,"mapPage"])->middleware("isAuthedByReimu");
 Route::get("/MapContent",[MapController::class,"getData"])->middleware("isAuthedByReimu");
+Route::get("/MapForMoveContent",[MapController::class,"getData"])->middleware("isAuthedByReimu");
 
 Route::get("/Planets",[PlanetController::class,"planetPage"])->middleware("isAuthedByReimu");
 Route::get("/Military",[MilitaryController::class,"militaryPage"])->middleware("isAuthedByReimu");
@@ -71,9 +72,9 @@ Route::prefix("Action")->group(function () {
     Route::post("/ShipTrans", [MilitaryController::class, "shipTrans"])->middleware("isAuthedByReimu");
     Route::post("/FleetDelete", [MilitaryController::class, "fleetDelete"])->middleware("isAuthedByReimu");
     Route::post("/ChangeArmyName", [MilitaryController::class, "changeArmyName"])->middleware("isAuthedByReimu");
-    Route::post("/MoveArmy", [MilitaryController::class, "moveArmy"])->middleware("isAuthedByReimu");
     Route::post("/ArmyDelete", [MilitaryController::class, "armyDelete"])->middleware("isAuthedByReimu");
     Route::post("/NewFleet", [MilitaryController::class, "newFleet"])->middleware("isAuthedByReimu");
+    Route::post("/Move", [MilitaryController::class, "move"])->middleware("isAuthedByReimu");
     Route::post("/SaveNews",[NewsController::class,"newsSave"])->middleware("isAuthedByReimu");
     Route::get("/PassNews/{id}",[NewsController::class,"newsPass"])->middleware("isAuthedByReimu");
 });

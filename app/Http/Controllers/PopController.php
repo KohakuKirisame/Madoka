@@ -50,13 +50,13 @@ class PopController extends Controller {
             foreach ($districts as $key => $value) {
                 $d = District::where(["name" => $value['name']])->first();
                 $d->job = json_decode($d->job, true);
-                if ($districts[$key]['ownership'] != 2) {
+                if ($districts[$key]['ownership'] != 1) {
                     $upJob = 0;
                     foreach ($d->job['upJob'] as $key2 => $value2) {
                         $upJob += $value2;
                     }
                     if (count($value['jobs']['upJob']) < $value['size'] * $upJob && $right > 0.67) {
-                        if ($value['ownership' == 2]) {
+                        if ($value['ownership' == 1]) {
                             continue;
                         }
                         foreach ($d->job['upJob'] as $job => $number) {

@@ -100,6 +100,15 @@ function readPlanet(id,privilege){
         "                                </div>\n" +
         "                            </li>");
         }
+        $("#pops").empty();
+        for (var key in data['pops']) {
+            $("#pops").append("<div class=\"card\" style=\"width: 50px;\">\n" +
+                "                   <div class=\"card-body\">\n" +
+                "                       <h5 class=\"card-title\">"+data['pops'][key][0]+"</h5>" +
+                "                       <p class='text-center'>"+data['pops'][key][1]+"</p>" +
+                "                   </div>" +
+                "              </div> ");
+        }
         $("#marketProduct").empty();
         for (var key in data['product']['market']) {
             if (data['product']['market'][key] > 0) {

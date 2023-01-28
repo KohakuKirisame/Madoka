@@ -613,65 +613,54 @@ class MilitaryController extends Controller{
         $name = $request->input("name");
         Army::where('id', $id)->update(["name"=>$name]);
     }
-    public function moveArmy(Request $request) {
-        $id = $request->input('id');
-        $targetStar = $request->input("target");
-        $uid = $request->session()->get('uid');
-        $MadokaUser = User::where(["uid"=>$uid])->first();
-        $privilege = $MadokaUser->privilege;
-        $country = $MadokaUser->country;
-        $army = Fleet::where(["id"=>$id])->first()->toArray();
-        if (($privilege == 2 && $army['owner'] == $country) || $privilege <= 1) {
-            $start = $army['position'];
-            $hyperLanes = Star::where("id", $start)->first()->hyperlane;
-            $hyperLanes = json_decode($hyperLanes, true);
-            $queue = [];
-            $previousStar = [$start, 0, 0];
-            $routeFinder = [[$start, 0],];
-            $visited = [$start,];
-            $isReached = false;
-            while (true) {
-                foreach ($hyperLanes as $hyperLane) {
-                    if (!in_array($hyperLane["to"], $visited)) {
-                        $queue[] = [$hyperLane["to"], $previousStar[1] + 1, $previousStar[0]];
-                        $routeFinder[] = [$hyperLane["to"], $previousStar[0]];
-                        $visited[] = $hyperLane["to"];
-                    }
-                    if (in_array($hyperLane["to"], $targetStar)) {
-                        $isReached = true;
-                        $target = $hyperLane["to"];
-                        break;
-                    }
+    function moveBFS($start,$targetStar) {
+        $hyperLanes = Star::where("id", $start)->first()->hyperlane;
+        $hyperLanes = json_decode($hyperLanes, true);
+        $queue = [];
+        $previousStar = [$start, 0, 0];
+        $routeFinder = [[$start, 0],];
+        $visited = [$start,];
+        $isReached = false;
+        while (true) {
+            foreach ($hyperLanes as $hyperLane) {
+                if (!in_array($hyperLane["to"], $visited)) {
+                    $queue[] = [$hyperLane["to"], $previousStar[1] + 1, $previousStar[0]];
+                    $routeFinder[] = [$hyperLane["to"], $previousStar[0]];
+                    $visited[] = $hyperLane["to"];
                 }
-                if ($isReached) {
-                    $ans = [$target, $previousStar[1] + 1, $previousStar[0]];
+                if (in_array($hyperLane["to"], $targetStar)) {
+                    $isReached = true;
+                    $target = $hyperLane["to"];
                     break;
-                } else {
-                    $previousStar = array_shift($queue);
-                    $hyperLanes = Star::where("id", $previousStar[0])->first()->hyperlane;
-                    $hyperLanes = json_decode($hyperLanes, true);
                 }
             }
-            unset($hyperLanes);
-            unset($queue);
-            $route = [$target,];
-            $prev = $ans[2];
-            while (true) {
-                foreach ($routeFinder as $item) {
-                    if ($prev == 0) {
-                        break;
-                    } elseif ($prev == $item[0]) {
-                        $route[] = $item[0];
-                        $prev = $item[1];
-                    }
-                }
+            if ($isReached) {
+                $ans = [$target, $previousStar[1] + 1, $previousStar[0]];
+                break;
+            } else {
+                $previousStar = array_shift($queue);
+                $hyperLanes = Star::where("id", $previousStar[0])->first()->hyperlane;
+                $hyperLanes = json_decode($hyperLanes, true);
+            }
+        }
+        unset($hyperLanes);
+        unset($queue);
+        $route = [$target,];
+        $prev = $ans[2];
+        while (true) {
+            foreach ($routeFinder as $item) {
                 if ($prev == 0) {
                     break;
+                } elseif ($prev == $item[0]) {
+                    $route[] = $item[0];
+                    $prev = $item[1];
                 }
             }
-            $route = array_reverse($route);
-            Army::where('id',$id)->update(["moving"=>$route]);
+            if ($prev == 0) {
+                break;
+            }
         }
+        return $route = array_reverse($route);
     }
     public function deleteArmy(Request $request) {
         $uid = $request->session()->get('uid');
@@ -709,5 +698,31 @@ class MilitaryController extends Controller{
             $fleet->computer = 2;
             $fleet->save();
         }
+    }
+    public function move(Request $request) {
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $type = $request->input('type');
+        $id = $request->input('id');
+        $target = $request->input('target');
+        if ($type == 'fleet') {
+            $fleet = Fleet::where(["id"=>$id])->first();
+            if (($MadokaUser->country == $fleet->owner && $privilege == 2) || $privilege <= 1) {
+                $route = $this->moveBFS($fleet->position,$target);
+                $route = json_encode($route,JSON_UNESCAPED_UNICODE);
+                $fleet->moving = $route;
+                $fleet->save();
+            }
+        } elseif($type == 'army') {
+            $army = Army::where(["id"=>$id])->first();
+            if (($MadokaUser->country == $army->owner && $privilege == 2) || $privilege <= 1) {
+                $route = $this->moveBFS($army->position,$target);
+                $route = json_encode($route,JSON_UNESCAPED_UNICODE);
+                $army->moving = $route;
+                $army->save();
+            }
+        }
+
     }
 }
