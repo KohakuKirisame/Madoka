@@ -561,7 +561,7 @@ class MilitaryController extends Controller{
         $MadokaUser = User::where(["uid"=>$uid])->first();
         $privilege = $MadokaUser->privilege;
         $country = $MadokaUser->country;
-        if ($privilege == 0) {
+        if ($privilege <= 1) {
             $fleets = Fleet::get()->toArray();
         }
         else {
