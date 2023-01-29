@@ -27,7 +27,7 @@
         @for($i = 0; $i < intval($slots); $i++)
             <div class="card mb-4">
                 <div class="card-body">
-                    @if($i>=count($country['techList'])||!key_exists($i,$country['techList']))
+                    @if($i>=count($country['techList'])||!key_exists("area",$country['techList'][$i]))
                         <button class="btn btn-light" type="button" data-bs-toggle="modal" href="#newTechModal")>科研方向选择</button>
                     @else
                         {{$country['techList'][$i]['area']}}<br>
