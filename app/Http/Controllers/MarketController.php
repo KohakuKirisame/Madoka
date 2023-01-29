@@ -16,7 +16,6 @@ class MarketController extends Controller {
     public array $member,$planets,$trades,$goods;
     function __construct($country=-1) {
         if($country!=-1) {
-
             $m = Market::where(["owner" => $country])->first();
             $this->owner = $country;
             if (is_null($m)) {
@@ -62,11 +61,11 @@ class MarketController extends Controller {
         foreach ($this->planets as $key => $value) {
             $product = json_decode(Planet::where(["id"=>$value])->first()->product,true);
             foreach ($this->goods as $key2 => $value2) {
-                if ($product[$key2] < 0) {
-                    $this->goods[$key2]['demandOrder'] -= $product[$key2];
+                if ($product['market'][$key2] < 0) {
+                    $this->goods[$key2]['demandOrder'] -= $product['market'][$key2];
                 }
                 else {
-                    $this->goods[$key2]['supplyOrder'] += $product[$key2];
+                    $this->goods[$key2]['supplyOrder'] += $product['market'][$key2];
                 }
             }
         }
@@ -141,16 +140,13 @@ class MarketController extends Controller {
         $this->UpdateMarket();
     }
     //贸易计算//
-    function newTrade($start,$targetCountry,$resource,$num,$duration) {
+    function newTradeFunc($start,$targetCountry,$resource,$num,$duration) {
         $stars = Star::get()->toArray();
         $hubArray = [];
         foreach ($stars as $key => $value) {
             $stars[$key]['hyperlane'] = json_decode($value['hyperlane'], true);
-            if ($stars[$key]['stationType'] != '' && $stars[$key]['stationType'] != 'outpost') {
-                $isTradeHub = Station::where(["position" => $value['id']])->first()->isTradeHub;
-                if ($stars[$key]['owner'] == $targetCountry && $isTradeHub == 1) {
-                    $hubArray[] = $value['id'];
-                }
+            if ($stars[$key]['owner'] == $targetCountry && $stars[$key]['isTradeHub'] == 1) {
+                $hubArray[] = $value['id'];
             }
         }
         $hyperLanes = Star::where("id", $start)->first()->hyperlane;
@@ -204,7 +200,55 @@ class MarketController extends Controller {
         $trade = json_encode($this->trades,JSON_UNESCAPED_UNICODE);
         Market::where(["owner"=>$this->owner])->update(["trades"=>$trade]);
     }
-
+    public function newTrade(Request $request) {
+        $id = $request->input('id');
+        $target = $request->input('target');
+        $resource = $request->input('resource');
+        $value = $request->input('value');
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid" => $uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $MadokaUser->country;
+        $id = Country::where(["name" => $id])->first()->tag;
+        if ($target == "" || $resource="" || $value="" || is_null($target) || is_null($resource) || is_null($value)) {
+            return;
+        }
+        if ($id == $country) {
+            $this->owner = $id;
+            $this->newTradeFunc(Country::where(["tag"=>$id])->first()->capital,$target,$resource,$value,99);
+            $m = new MarketController($target);
+            $m->newTradeFunc(Country::where(["tag"=>$target])->first()->capital,$id,$resource,-$value,99);
+        }
+    }
+    public function deleteTrade(Request $request) {
+        $id = $request->input('id');
+        $target = $request->input('target');
+        $resource = $request->input('resource');
+        $value = $request->input('value');
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid" => $uid])->first();
+        $country = $MadokaUser->country;
+        $id = Country::where(["name" => $id])->first()->tag;
+        $target = Country::where(["name" => $target])->first()->tag;
+        if ($id == $country) {
+            $this->__construct($id);
+            foreach ($this->trades as $key=>$trade) {
+                if ($trade["target"] == $target && $trade["content"][0] == $resource && $trade["content"][1] == $value) {
+                    unset($this->trades[$key]);
+                    break;
+                }
+            }
+            $this->UpdateMarket();
+            $m = new MarketController($target);
+            foreach ($m->trades as $key=>$trade) {
+                if ($trade["target"] == $target && $trade["content"][0] == $resource && $trade["content"][1] == -$value) {
+                    unset($m->trades[$key]);
+                    break;
+                }
+            }
+            $m->UpdateMarket();
+        }
+    }
     function countTrade() {
     $country = Country::where(["tag"=>$this->owner])->first()->toArray();
         foreach ($this->trades as $key => $value) {
@@ -240,7 +284,7 @@ class MarketController extends Controller {
         $uid=$request->session()->get('uid');
         $u = User::where(["uid"=>$uid])->first();
         $user=UserController::GetInfo($uid);
-        if (in_array("Err",$user)){
+        if (key_exists("Err",$user)){
             return redirect("/Action/Logout");
         }
         $privilege = $u->privilege;
@@ -271,6 +315,11 @@ class MarketController extends Controller {
             $markets[$key]['owner'] = [$markets[$key]['owner'],Country::where(["tag"=>$markets[$key]['owner']])->first()->name];
         }
         return view("market",["user"=>$user,"market"=>$this,"markets"=>$markets,"privilege"=>$privilege]);
+    }
+    public function readMarket(Request $request){
+        $id = $request->input("id");
+        $goods = Market::where(["owner"=>$id])->first()->goods;
+        return $goods;
     }
 }
 

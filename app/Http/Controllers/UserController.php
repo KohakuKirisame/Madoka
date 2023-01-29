@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use App\Models\Definition;
+use App\Models\Population;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -100,6 +102,36 @@ class UserController extends Controller {
         }
         $country['species'] = json_decode($country['species'],true);
         $country['techs'] = json_decode($country['techs'],true);
+        $country['ModifierList'] = json_decode($country['ModifierList'],true);
+        foreach ($country['ModifierList'] as $key=>$modifiers) {
+            foreach ($modifiers['modifier'] as $key2=>$value) {
+                $modifierName = Definition::where(["name"=>$key2])->first()->localization;
+                $country['ModifierList'][$key]['modifier'][$modifierName] =$value;
+                unset($country['ModifierList'][$key]['modifier'][$key2]);
+            }
+        }
+        $country['planets'] = json_decode($country['planets'],true);
+        $pops = Population::get()->toArray();
+        $species = [];
+        foreach ($pops as $pop) {
+            if (in_array($pop['position'],$country['planets'])) {
+                if (!in_array($pop['species'],$species)) {
+                    $species[] = $pop['species'];
+                }
+            }
+        }
+        $Species = [];
+        foreach ($country['species'] as $spe) {
+            if (!in_array($spe['name'],$Species)) {
+                $Species[] = $spe['name'];
+            }
+        }
+        foreach ($species as $spe) {
+            if (!in_array($spe, $Species)) {
+                $country['species'][] = ["name"=>$spe,"right"=>0];
+            }
+        }
+        Country::where(["tag"=>$country['tag']])->update(["species"=>json_encode($country['species'],JSON_UNESCAPED_UNICODE )]);
         return view("dashboard",["privilege"=>$privilege,"user"=>$user,
             "country"=>$country]);
     }

@@ -69,6 +69,32 @@ function buildArmy() {
     },function(data) {
     });
 }
+function adminDeletePop(id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/AdminDeletePop',{
+        id : id,
+        planet:nowControlling
+    },function() {
+        $("#pop"+id).remove();
+        location.reload();
+    });
+}
+function planetCount(id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/PlanetCount',{
+        id : id,
+    },function(data) {
+        readPlanet(id,0);
+    });
+}
 function readPlanet(id,privilege){
     $.ajaxSetup({
         headers: {
@@ -107,37 +133,48 @@ function readPlanet(id,privilege){
         "                                    <p class=\"col-2 text-center\">"+data['districts'][key]['size']+"</p>\n" +
         "                                    <p class=\"col-2 text-center\">"+data['districts'][key]['ownership']+"</p>\n" +
         "                                    <p class=\"col-3 text-center\">"+Math.round(data['districts'][key]['cash'])+"</p>\n" +
-        "                                    <p class=\"col-2 text-center\">"+data['districts'][key]['profit']+"</p>\n" +
+        "                                    <p class=\"col-2 text-center\">"+Math.round(data['districts'][key]['profit'])+"</p>\n" +
         "                                </div>\n" +
         "                            </li>");
         }
         $("#pops").empty();
         for (var key in data['pops']) {
-            $("#pops").append("<div class=\"card col-2\">\n" +
-                "                   <div class=\"card-body\">\n" +
-                "                       <h7 class=\"card-title text-center\">"+data['pops'][key][0]+"</h7>" +
-                "                       <p class='text-center'>"+data['pops'][key][1]+"</p>" +
-                "                   </div>" +
-                "              </div> ");
+            if (privilege <= 1) {
+                $("#pops").append("<div class=\"card col-2\" id=\"pop-"+data['pops'][key][0]+"\">\n" +
+                    "                   <div class=\"card-body\">\n" +
+                    "                       <h7 class=\"card-title text-center\">"+data['pops'][key][1]+"</h7>" +
+                    "                       <p class='text-center'>"+data['pops'][key][2]+"</p>" +
+                    "                       <button class=\"btn btn-primary\" type=\"button\" onclick=\"adminDeletePop("+data['pops'][key][0]+")\">Delete</button>" +
+                    "                   </div>" +
+                    "              </div> ");
+            } else {
+                $("#pops").append("<div class=\"card col-2\">\n" +
+                    "                   <div class=\"card-body\" id=\"pop-"+data['pops'][key][0]+"\">\n" +
+                    "                       <h7 class=\"card-title text-center\">"+data['pops'][key][1]+"</h7>" +
+                    "                       <p class='text-center'>"+data['pops'][key][2]+"</p>" +
+                    "                   </div>" +
+                    "              </div> ");
+            }
         }
         $("#marketProduct").empty();
         for (var key in data['product']['market']) {
             if (data['product']['market'][key] > 0) {
-                $("#marketProduct").append("<span class=\"badge bg-light text-dark\"><img src='storage/img/resource/"+key+".png'/>"+data['product']['market'][key]+"</span>");
-            } else if (data['product']['market'][key] > 0) {
-                $("#marketProduct").append("<span class=\"badge bg-light text-dark\"><img src='storage/img/resource/"+key+".png'/>"+data['product']['market'][key]+"</span>");
+                $("#marketProduct").append("<span class=\"badge bg-light text-dark\"><img src='storage/img/resource/"+key+".png'/>"+Math.round(data['product']['market'][key])+"</span>");
+            } else if (data['product']['market'][key] < 0) {
+                $("#marketProduct").append("<span class=\"badge bg-danger text-dark\"><img src='storage/img/resource/"+key+".png'/>"+Math.round(data['product']['market'][key])+"</span>");
             }
         }
         $("#countryProduct").empty();
         for (var key in data['product']['country']) {
             if (data['product']['country'][key] > 0) {
-                $("#countryProduct").append("<span class=\"badge bg-light text-dark\"><img src='storage/img/resource/"+key+".png'/>"+data['product']['country'][key]+"</span>");
-            } else if (data['product']['country'][key] > 0) {
-                $("#countryProduct").append("<span class=\"badge bg-danger text-dark\"><img src='storage/img/resource/"+key+".png'/>"+data['product']['country'][key]+"</span>");
+                $("#countryProduct").append("<span class=\"badge bg-light text-dark\"><img src='storage/img/resource/"+key+".png'/>"+Math.round(data['product']['country'][key])+"</span>");
+            } else if (data['product']['country'][key] < 0) {
+                $("#countryProduct").append("<span class=\"badge bg-danger text-dark\"><img src='storage/img/resource/"+key+".png'/>"+Math.round(data['product']['country'][key])+"</span>");
             }
         }
         $("#adminButton").empty();
-        if (privilege == 0 || privilege == 1) {
+        if (privilege <=1) {
+            $("#adminButton").append("<button type=\"button\" class=\"btn btn-danger\" onclick=\"planetCount("+id+")\">单星计算</button>");
             $("#adminButton").append("<button type=\"button\" class=\"btn btn-primary\" data-bs-target=\"#newPopModal\" data-bs-toggle=\"modal\" data-bs-dismiss=\"modal\">新建人口</button>");
             $("#adminButton").append("<button type=\"button\" class=\"btn btn-primary\" data-bs-target=\"#newMarketDistrictModal\" data-bs-toggle=\"modal\" data-bs-dismiss=\"modal\">新建市场区划</button>");
         }

@@ -70,10 +70,33 @@ class CountryController
             if ($item['tech'] == $tech) {
                 var_dump($techList);
                 unset($techList[$key]);
+                array_values($techList);
                 break;
             }
         }
         Country::where(["tag"=>$id])->update(["techList"=>json_encode($techList,JSON_UNESCAPED_UNICODE)]);
+    }
+    public function adminAddTech(Request $request) {
+        $uid = $request->session()->get('uid');
+        $user= UserController::GetInfo($uid);
+        if(key_exists('Err',$user)){
+            return redirect('/Action/Logout');
+        }
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $country = $request->input('country');
+        $tech = $request->input('tech');
+        if ($privilege <= 1) {
+            $country = Country::where(["tag"=>$country])->first();
+            $techs = json_decode($country->techs,true);
+            $ModifierList = json_decode($country->ModifierList,true);
+            $techs[] = $tech;
+            $modifier = json_decode(Tech::where(["name"=>$tech])->first()->modifier,true);
+            $ModifierList[] = ["name"=>$tech,"modifier"=>$modifier];
+            $country->ModifierList = json_encode($ModifierList,JSON_UNESCAPED_UNICODE);
+            $country->techs = json_encode($techs,JSON_UNESCAPED_UNICODE);
+            $country->save();
+        }
     }
     function techCount(){
         $country = Country::where(["tag"=>$this->tag])->first()->toArray();
@@ -83,12 +106,13 @@ class CountryController
         $techList = json_decode($country['techList'],true);
         foreach ($techList as $item) {
             if ($item['process'] >= $item['cost']) {
-                $modifierList = json_decode($country['ModifierList'],true);
+                $ModifierList = json_decode($country['ModifierList'],true);
                 $techs[] = $item['tech'];
                 $modifier = json_decode(Tech::where(["name"=>$item['tech']])->first()->modifier,true);
                 $ModifierList[] = ["name"=>$item['tech'],"modifier"=>$modifier];
                 $country['ModifierList'] = json_encode($ModifierList,JSON_UNESCAPED_UNICODE);
                 unset($item);
+                array_values($techList);
                 break;
             }
             $process = random_int(10,100)*(1+($item['allowance']/$item['cost']));
@@ -101,6 +125,7 @@ class CountryController
         Country::where(["tag"=>$this->tag])->update(["techList"=>$techList,"techs"=>$techs,"ModifierList"=>$country['ModifierList']]);
     }
     function modifierCount() {
+        echo $this->tag;
         $country = Country::where(["tag"=>$this->tag])->first();
         $ModifierList = json_decode($country->ModifierList, true);
         $modifierIDs = Definition::get()->toArray();
@@ -142,9 +167,9 @@ class CountryController
         $MadokaUser = User::where(["uid"=>$uid])->first();
         $privilege = $MadokaUser->privilege;
         $country = $MadokaUser->country;
-        if($privilege <= 1) {
+        if($privilege == 0) {
             $country = Country::where(["tag"=>"GSK"])->first()->toArray();
-        } elseif ($privilege == 2) {
+        } elseif ($privilege == 2 || $privilege == 1) {
             $country = User::where("uid",$uid)->first()->country;
             $country = Country::where(["tag"=>$country])->first()->toArray();
         }
@@ -165,8 +190,15 @@ class CountryController
         }
         $country['techList'] = json_decode($country['techList'],true);
         $techArea = TechArea::get()->toArray();
+        $techs = Tech::get()->toArray();
+        foreach($techs as $key=>$tech) {
+            if(in_array($tech['name'],$country['techs'])) {
+                unset($techs[$key]);
+                array_values($techs);
+            }
+        }
         return view("technology",["privilege"=>$privilege,"user"=>$user,
-            "country"=>$country,"slots"=>$slots,"techArea"=>$techArea]);
+            "country"=>$country,"slots"=>$slots,"techArea"=>$techArea,"techs"=>$techs]);
     }
     public function mainFunction($id) {
         ini_set("display_errors", "On");

@@ -18,7 +18,7 @@
             </div>
             <div class="col text-center">
                 <h4 class="text-center h4">{{$country['name']}}</h4>
-                <p class="text-center" style="display:inline">掌握恒星系{{count(json_decode($country['stars'],true))}}个；掌握行星{{count(json_decode($country['planets']))}}个</p>
+                <p class="text-center" style="display:inline">掌握恒星系{{count(json_decode($country['stars'],true))}}个；掌握行星{{count($country['planets'])}}个</p>
             </div>
         </div>
     </div>
@@ -86,6 +86,19 @@
             <div style="display:inline">下层税率</div>&nbsp<div id="lowTax" style="display:inline">{{$country['lowPopTax']}}</div>
             <input style="display:inline" type="range" class="form-range" min="0" max="1" step="0.01" id="lowPopTax" value="{{$country['lowPopTax']}}" onchange="changeTax('{{$country['tag']}}','lowPopTax')"/>&nbsp
         </span><br>
+    </div>
+</div>
+<div class="row">
+    <div class="container col-10 my-4 py-4 rounded shadow-lg" style="background: #FFF">
+        <h5 class="text-center" style="display:inline">已生效的国家修正</h5><br>
+        @foreach($country['ModifierList'] as $key => $value)
+            <span class="badge bg-light text-dark ">
+                <h5>{{$value['name']}}</h5>
+                @foreach($value['modifier'] as $key2=>$value2)
+                    {{$key2}} : {{$value2*100}}%
+                @endforeach
+            </span>
+        @endforeach
     </div>
 </div>
 <div class="container">

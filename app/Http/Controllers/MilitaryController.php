@@ -12,7 +12,6 @@ use App\Models\ShipType;
 use App\Models\Star;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 class MilitaryController extends Controller{
 
@@ -747,7 +746,7 @@ class MilitaryController extends Controller{
         $MadokaUser = User::where(["uid"=>$uid])->first();
         $privilege = $MadokaUser->privilege;
         $country = $MadokaUser->country;
-        $army = Fleet::where(["id"=>$request->input('id')])->first()->toArray();
+        $army = Army::where(["id"=>$request->input('id')])->first()->toArray();
         if (($privilege == 2 && $army['owner'] == $country) || $privilege <= 1) {
             Army::where(["id"=>$army['id']])->delete();
         }

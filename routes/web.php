@@ -70,6 +70,8 @@ Route::prefix("Action")->group(function () {
     Route::post("/BuildDistrict", [PlanetController::class, "buildDistrict"])->middleware("isAuthedByReimu");
     Route::post("/BuildMarketDistrict", [PlanetController::class, "buildMarketDistrict"])->middleware("isAuthedByReimu");
     Route::post("/BuildArmy", [PlanetController::class, "buildArmy"])->middleware("isAuthedByReimu");
+    Route::post("/AdminDeletePop", [PlanetController::class, "adminDeletePop"])->middleware("isAuthedByReimu");
+    Route::post("/PlanetCount", [PlanetController::class, "planetCount"])->middleware("isAuthedByReimu");
     Route::post("/ReadFleet", [MilitaryController::class, "readFleet"])->middleware("isAuthedByReimu");
     Route::post("/ChangeFleetName", [MilitaryController::class, "changeFleetName"])->middleware("isAuthedByReimu");
     Route::post("/ChangeShipName", [MilitaryController::class, "changeShipName"])->middleware("isAuthedByReimu");
@@ -90,6 +92,10 @@ Route::prefix("Action")->group(function () {
     Route::post("/ChooseTech",[CountryController::class,"chooseTech"])->middleware("isAuthedByReimu");
     Route::post("/DeleteTech",[CountryController::class,"deleteTech"])->middleware("isAuthedByReimu");
     Route::post("/ChangeAllowance",[CountryController::class,"setTechAllowance"])->middleware("isAuthedByReimu");
+    Route::post("/AdminAddTech",[CountryController::class,"adminAddTech"])->middleware("isAuthedByReimu");
+    Route::post("/ReadMarket",[MarketController::class,"readMarket"])->middleware("isAuthedByReimu");
+    Route::post("/NewTrade",[MarketController::class,"newTrade"])->middleware("isAuthedByReimu");
+    Route::post("/DeleteTrade",[MarketController::class,"deleteTrade"])->middleware("isAuthedByReimu");
 });
 
 

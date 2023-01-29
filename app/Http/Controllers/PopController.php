@@ -30,7 +30,7 @@ class PopController extends Controller {
     //自动寻找工作//
     function findJob() {
         $country = Country::get()->toArray();
-        $right = 0;
+        $right = 1;
         foreach ($country as $key => $value) {
             $country[$key]['planets'] = json_decode($value['planets']);
             if (in_array($this->position,$country[$key]['planets'])) {
@@ -44,6 +44,7 @@ class PopController extends Controller {
                 }
             }
         }
+        echo $this->id."!".$right;
         if ($this->job == '无' || $this->workat == '无') {
             $p = Planet::where(["id" => $this->position])->first();
             $districts = json_decode($p->districts, true);
@@ -56,7 +57,7 @@ class PopController extends Controller {
                         $upJob += $value2;
                     }
                     if (count($value['jobs']['upJob']) < $value['size'] * $upJob && $right > 0.67) {
-                        if ($value['ownership' == 1]) {
+                        if ($value['ownership'] == 1) {
                             continue;
                         }
                         foreach ($d->job['upJob'] as $job => $number) {
@@ -101,8 +102,8 @@ class PopController extends Controller {
                     break;
                 }
             }
-        } //////////
-        else {
+
+        } else {
             $p = Planet::where(["id" => $this->position * 1])->first();
             $districts = json_decode($p->districts, true);
             $profitArray = [];
@@ -115,26 +116,45 @@ class PopController extends Controller {
                 $jobs = json_decode($d->job, true);
                 foreach ($districts as $key2 => $district) {
                     if ($key == $district['name']) {
-                        $key = $key2;
+                        $disKey = $key2;
                         break;
                     }
                 }
-                if ($districts[$key]['ownership'] != 2) {
+                foreach ($districts as $key2 => $district) {
+                    if ($this->workat == $district['name']) {
+                        $jobKey = $key2;
+                        break;
+                    }
+                }
+                if (is_null($jobKey)) {
+                    $this->job = '无';
+                    $this->class = 'low';
+                    $this->workat = '无';
+                    break;
+                }
+                if ($jobKey == $disKey) {
+                    continue;
+                }
+                if ($districts[$disKey]['ownership'] != 2) {
                     $upJob = 0;
                     foreach ($jobs['upJob'] as $key2 => $value2) {
                         $upJob += $value2;
                     }
-                    if (round($districts[$key]['size']) * count($districts[$key]['jobs']['upJob']) < $upJob) {
+                    if (round($districts[$disKey]['size']) * count($districts[$disKey]['jobs']['upJob']) < $upJob) {
                         foreach ($jobs['upJob'] as $job => $number) {
                             $this->job = $job;
                             break;
                         }
+                        echo "!!!";
                         $this->class = 'up';
-                        $this->workat = $value['name'];
-                        $districts[$key]['jobs']['upJob'][] = $this->id * 1;
-                        foreach ($districts[$key]['jobs'] as $key2 => $value2) {
+                        $this->workat = $districts[$disKey]['name'];
+                        $districts[$disKey]['jobs']['upJob'][] = $this->id * 1;
+                        var_dump($districts[$jobKey]['jobs']);
+                        foreach ($districts[$jobKey]['jobs'] as $key2 => $value2) {
                             $key3 = array_search($this->id, $value2);
-                            unset($districts[$key]['jobs'][$key2][$key3]);
+                            unset($districts[$jobKey]['jobs'][$key2][$key3]);
+                            var_dump($districts[$jobKey]['jobs']);
+                            var_dump($districts[$disKey]['jobs']);
                             break 2;
                         }
                         break;
@@ -144,17 +164,17 @@ class PopController extends Controller {
                  foreach ($jobs['midJob'] as $key2 => $value2) {
                     $midJob += $value2;
                 }
-                if (round($districts[$key]['size']) * count($districts[$key]['jobs']['midJob']) < $midJob && $this->job != 'up') {
+                if (round($districts[$disKey]['size']) * count($districts[$disKey]['jobs']['midJob']) < $midJob && $this->job != 'up') {
                     foreach ($jobs['midJob'] as $job => $number) {
                         $this->job = $job;
                         break;
                     }
                     $this->class = 'mid';
-                    $this->workat = $districts[$key]['name'];
-                    $districts[$key]['jobs']['midJob'][] = $this->id * 1;
-                    foreach ($districts[$key]['jobs'] as $key2 => $value2) {
+                    $this->workat = $districts[$disKey]['name'];
+                    $districts[$disKey]['jobs']['midJob'][] = $this->id * 1;
+                    foreach ($districts[$jobKey]['jobs'] as $key2 => $value2) {
                         $key3 = array_search($this->id, $value2);
-                        unset($districts[$key]['jobs'][$key2][$key3]);
+                        unset($districts[$jobKey]['jobs'][$key2][$key3]);
                         break 2;
                     }
                     break;
@@ -163,25 +183,25 @@ class PopController extends Controller {
                 foreach ($jobs['lowJob'] as $key2 => $value2) {
                     $lowJob += $value2;
                 }
-                if (round($districts[$key]['size']) * count($districts[$key]['jobs']['lowJob']) < $lowJob && $this->job == 'low') {
+                if (round($districts[$disKey]['size']) * count($districts[$disKey]['jobs']['lowJob']) < $lowJob && $this->job == 'low') {
                     foreach ($jobs['lowJob'] as $job => $number) {
                         $this->job = $job;
                         break;
                     }
                     $this->class = 'low';
-                    $this->workat = $districts[$key]['name'];
-                    $districts[$key]['jobs']['lowJob'][] = $this->id * 1;
-                    foreach ($districts[$key]['jobs'] as $key2 => $value2) {
+                    $this->workat = $districts[$disKey]['name'];
+                    $districts[$disKey]['jobs']['lowJob'][] = $this->id * 1;
+                    foreach ($districts[$jobKey]['jobs'] as $key2 => $value2) {
                         $key3 = array_search($this->id, $value2);
-                        unset($districts[$key]['jobs'][$key2][$key3]);
+                        unset($districts[$jobKey]['jobs'][$key2][$key3]);
                         break 2;
                     }
                     break;
                 }
             }
         }
-        $p->districts = json_encode($districts, JSON_UNESCAPED_UNICODE);
-        Planet::where(["id" => $this->position])->update(["districts" => $districts]);
+        $districts = json_encode($districts, JSON_UNESCAPED_UNICODE);
+        Planet::where(["id"=>$this->position])->update(["districts"=>$districts]);
         Population::where(["id" => $this->id])->update(["job" => $this->job,"class"=>$this->class,"workat" => $this->workat]);
     }
     //投资//

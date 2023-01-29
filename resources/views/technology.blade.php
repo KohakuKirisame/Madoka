@@ -27,7 +27,7 @@
         @for($i = 0; $i < intval($slots); $i++)
             <div class="card mb-4">
                 <div class="card-body">
-                    @if($i>=count($country['techList']))
+                    @if($i>=count($country['techList'])||!key_exists($i,$country['techList']))
                         <button class="btn btn-light" type="button" data-bs-toggle="modal" href="#newTechModal")>科研方向选择</button>
                     @else
                         {{$country['techList'][$i]['area']}}<br>
@@ -64,7 +64,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <div id="adminButton"></div>
+                @if($privilege <= 1)
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal" href="#allTechModal")>增加科技</button>
+                @endif
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-dismiss="modal">返回</button>
             </div>
         </div>
@@ -113,6 +115,51 @@
                             <div class="card p-2" style="background:lightyellow">
                                 <div class="card-body p-4">
                                     {{$area['area']}}<button class="btn btn-primary" style="float:right" type="button" data-bs-dismiss="modal" onclick="chooseTech('{{$country['tag']}}','{{$area['area']}}')")>选择此项</button>
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="adminButton"></div>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" href="#planetModel">返回</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="allTechModal" tabindex="-1" aria-labelledby="allTechModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新增科技</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    @foreach($techs as $tech)
+                        @if($tech['subject'] == '物理学')
+                            <div class="col-3">
+                                <div class="card" style="background:lightblue">
+                                    <div class="card-body">
+                                        {{$tech['name']}}<button class="btn btn-primary" style="float:right" type="button" data-bs-dismiss="modal" onclick="adminAddTech('{{$country['tag']}}','{{$tech['name']}}')")>选择</button>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif($tech['subject'] == '社会学')
+                            <div class="col-3">
+                                <div class="card" style="background:lightgreen">
+                                    <div class="card-body">
+                                        {{$tech['name']}}<button class="btn btn-primary" style="float:right" type="button" data-bs-dismiss="modal" onclick="adminAddTech('{{$country['tag']}}','{{$tech['name']}}')")>选择</button>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="col-3">
+                                <div class="card" style="background:lightyellow">
+                                    <div class="card-body">
+                                        {{$tech['name']}}<button class="btn btn-primary" style="float:right" type="button" data-bs-dismiss="modal" onclick="adminAddTech('{{$country['tag']}}','{{$tech['name']}}')")>选择</button>
+                                    </div>
                                 </div>
                             </div>
                         @endif

@@ -47,3 +47,16 @@ function changeAllowance(id) {
         location.reload();
     });
 }
+function adminAddTech(country,tech) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $.post('/Action/AdminAddTech',{
+        country: country,
+        tech: tech
+    },function() {
+        location.reload();
+    });
+}
