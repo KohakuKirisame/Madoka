@@ -251,7 +251,26 @@ class MarketController extends Controller {
             $country=$u->country;
         }
         $this->__construct($country);
-        return view("market",["user"=>$user,"market"=>$this,"privilege"=>$privilege]);
+        $this->owner = Country::where(["tag"=>$this->owner])->first()->name;
+        foreach ($this->planets as $key=>$planet) {
+            $this->planets[$key] = Planet::where(["id"=>$planet])->first()->name;
+        }
+        foreach ($this->trades as $key=>$trade) {
+            $this->trades[$key]['target'] = Country::where(["tag"=>$trade['target']])->first()->name;
+            foreach($trade['path'] as $key2=>$star) {
+                $this->trades[$key]['path'][$key2] = Star::where(["id"=>$star])->first()->name;
+            }
+        }
+        $markets = Market::get()->toArray();
+        foreach ($markets as $key=>$m) {
+            if (Country::where(["tag"=>$m['owner']])->first()->economyType == 1) {
+                unset($markets[$key]);
+                continue;
+            }
+            $markets[$key]['goods'] = json_decode($m['goods'],true);
+            $markets[$key]['owner'] = [$markets[$key]['owner'],Country::where(["tag"=>$markets[$key]['owner']])->first()->name];
+        }
+        return view("market",["user"=>$user,"market"=>$this,"markets"=>$markets,"privilege"=>$privilege]);
     }
 }
 

@@ -261,7 +261,7 @@
             </div>
             <div class="modal-footer">
                 <div id="adminButton"></div>
-                <button type="button" class="btn btn-success" data-bs-dismiss="model" onclick="newFleet({{$country}})">新建</button>
+                <button type="button" class="btn btn-success" data-bs-dismiss="model" onclick="newFleet('{{$country}}')">新建</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="model">返回</button>
             </div>
         </div>
