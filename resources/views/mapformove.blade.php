@@ -55,7 +55,7 @@
                     $ownered = False;
                     foreach($planets as $planet) {
                         if ($stars[$i]['id'] == $planet['position']) {
-                            $img = $planet['type'];
+                            $img = 'wet';
                             if ($planet['controller'] != '') {
                                 $ownered = true;
                             }

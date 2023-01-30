@@ -32,10 +32,8 @@
                     @else
                         {{$country['techList'][$i]['area']}}<br>
                         正在研究{{$country['techList'][$i]['tech']}}<br>
-                        正在补贴{{$country['techList'][$i]['allowance']}}<br>
                         {{$country['techList'][$i]['process']}}/{{$country['techList'][$i]['cost']}}<input type="range" class="form-range" id="disabledRange" min="0" max="{{$country['techList'][$i]['cost']}}" value="{{$country['techList'][$i]['process']}}" disabled>
                         <button class="btn btn-danger" style="float:right" type="button" onclick="deleteTech('{{$country['tag']}}','{{$country['techList'][$i]['tech']}}')")>取消研究</button>
-                        <button class="btn btn-success" style="float:right" type="button" data-bs-toggle="modal" href="#allowanceModal" onclick="readAllowance('{{$country['techList'][$i]['allowance']}}','{{$country['techList'][$i]['tech']}}')")>设置补贴</button>
                     @endif
                 </div>
             </div>

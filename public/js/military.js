@@ -58,7 +58,9 @@ function newShip(type) {
     $.post('/Action/NewShip',{
         id : nowControlling,
         type : type,
-    },function() {});
+    },function() {
+        location.reload();
+    });
 }
 function getFleets(type,id) {
     $.ajaxSetup({
@@ -221,6 +223,7 @@ function readFleet(id) {
         $('#shield').html(data['shield']);
         $('#evasion').html(data['evasion']);
         $('#speed').html(data['speed']);
+        $('#power').html(data['power']);
         $('#weaponA').empty();
         $('#weaponB').empty();
         if (data['weaponA'] == 1) {

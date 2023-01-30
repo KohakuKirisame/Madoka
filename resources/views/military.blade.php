@@ -128,6 +128,7 @@
                                     <h6 class="col text-center">护盾</h6>
                                     <h6 class="col text-center">闪避</h6>
                                     <h6 class="col text-center">速度</h6>
+                                    <h6 class="col text-center">战力</h6>
                                 </div>
                             </li>
                             <li class="list-group-item">
@@ -139,6 +140,7 @@
                                     <p class="col text-center" id="shield"></p>
                                     <p class="col text-center" id="evasion"></p>
                                     <p class="col text-center" id="speed"></p>
+                                    <p class="col text-center" id="power"></p>
                                 </div>
                             </li>
                         </ul>

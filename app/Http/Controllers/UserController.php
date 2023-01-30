@@ -91,7 +91,7 @@ class UserController extends Controller {
         } else {
             return redirect("/News");
         }
-        $country['storage'] = json_decode($country['storage'],true);
+        $country['resource'] = json_decode($country['resource'],true);
         $country['atWarWith'] = json_decode($country['atWarWith'],true);
         foreach($country['atWarWith'] as $key=>$value) {
             $country['atWarWith'][$key] = [$value,Country::where(["tag"=>$value])->first()->name];

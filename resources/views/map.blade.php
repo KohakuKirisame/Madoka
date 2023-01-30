@@ -55,7 +55,7 @@
                         @foreach($planets as $planet)
                             @php
                                 if ($stars[$i]['id'] == $planet['position']) {
-                                    $img = $planet['type'];
+                                    $img = 'wet';
                                 }
                             @endphp
                         @endforeach
@@ -112,7 +112,7 @@
                     $ownered = False;
                     foreach($planets as $planet) {
                         if ($stars[$i]['id'] == $planet['position']) {
-                            $img = $planet['type'];
+                            $img = 'wet';
                             if ($planet['controller'] != '') {
                                 $ownered = true;
                             }
@@ -213,11 +213,15 @@
                     data-bs-container ='body'
                     data-bs-html='true'
                     title={{$value['name']}}
-                    data-bs-content='隶属于{{$value['owner']}}'>
-                    @if($value['owner'] == $country)
+                    data-bs-content='隶属于{{$value['owner']}}<br>舰队实力{{$value['power']}}'>
+                    @if($value['owner'] == $selfCountry)
                         <img src='storage/img/military/fleet_green.png' width='20px' />
-                        @else
+                    @elseif(in_array($value['owner'],$allied))
+                        <img src='storage/img/military/fleet_blue.png' width='20px' />
+                    @elseif(in_array($value['owner'],$war))
                         <img src='storage/img/military/fleet_red.png' width='20px' />
+                    @else
+                        <img src='storage/img/military/fleet_yellow.png' width='20px' />
                     @endif
                 </button>
             @endif
@@ -238,10 +242,14 @@
                         data-bs-html='true'
                         title={{$value['name']}}
                 data-bs-content='隶属于{{$value['owner']}}'>
-                    @if($value['owner'] == $country)
+                    @if($value['owner'] == $selfCountry)
                         <img src='storage/img/military/army_green.png' width='20px' />
-                    @else
+                    @elseif(in_array($value['owner'],$allied))
+                        <img src='storage/img/military/army_blue.png' width='20px' />
+                    @elseif(in_array($value['owner'],$war))
                         <img src='storage/img/military/army_red.png' width='20px' />
+                    @else
+                        <img src='storage/img/military/army_yellow.png' width='20px' />
                     @endif
                 </button>
             @endif

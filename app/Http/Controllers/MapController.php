@@ -28,18 +28,31 @@ class MapController extends Controller {
                 $stations = Station::get()->toArray();
                 $planets = Planet::get()->toArray();
                 $planetTypes = PlanetType::get()->toArray();
+                $allied = [];
+                $war = [];
                 if ($privilege <= 1) {
                     $fleets = Fleet::get()->toArray();
                     $armys = Army::get()->toArray();
                 } elseif ($privilege >=2) {
+                    $allied = json_decode(Country::where(["tag"=>$country])->first()->alliedWith);
+                    $war = json_decode(Country::where(["tag"=>$country])->first()->alliedWith);
                     $fleets = Fleet::where(["owner"=>$country])->get()->toArray();
                     $armys = Army::where(["owner"=>$country])->get()->toArray();
+                    foreach ($stars as $star) {
+                        if ($star['owner'] == $country || $star['controller'] == $country || in_array($star['owner'],$allied) || in_array($star['controller'],$allied)) {
+                            $fleets = array_merge($fleets,Fleet::where(["position"=>$star['id']])->get()->toArray());
+                            $armys = array_merge($armys,Army::where(["position"=>$star['id']])->get()->toArray());
+                        }
+                    }
                 }
                 return view("map",["stars"=>$stars,"countrys"=>$countries,
                     "stations"=>$stations,"planets"=>$planets,
                     "planetTypes"=>$planetTypes,
                     "fleets"=>$fleets,
                     "armys"=>$armys,
+                    "allied"=>$allied,
+                    "war" => $war,
+                    "selfCountry"=>$country,
                     "privilege"=>$privilege]);
             }
         }else {
@@ -96,8 +109,7 @@ class MapController extends Controller {
                     $lastCStars = json_decode(Country::where(["tag"=>$lastOwner])->first()->stars,true);
                     foreach ($lastCStars as $key => $value) {
                         if ($value == $id) {
-                            unset($lastCStars[$key]);
-                            array_values($lastCStars);
+                            array_splice($lastCStars,$key,1);
                             break;
                         }
                     }

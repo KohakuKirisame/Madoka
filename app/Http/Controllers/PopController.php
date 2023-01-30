@@ -149,12 +149,9 @@ class PopController extends Controller {
                         $this->class = 'up';
                         $this->workat = $districts[$disKey]['name'];
                         $districts[$disKey]['jobs']['upJob'][] = $this->id * 1;
-                        var_dump($districts[$jobKey]['jobs']);
                         foreach ($districts[$jobKey]['jobs'] as $key2 => $value2) {
                             $key3 = array_search($this->id, $value2);
-                            unset($districts[$jobKey]['jobs'][$key2][$key3]);
-                            var_dump($districts[$jobKey]['jobs']);
-                            var_dump($districts[$disKey]['jobs']);
+                            array_splice($districts[$jobKey]['jobs'][$key2],$key3,1);
                             break 2;
                         }
                         break;
@@ -174,7 +171,7 @@ class PopController extends Controller {
                     $districts[$disKey]['jobs']['midJob'][] = $this->id * 1;
                     foreach ($districts[$jobKey]['jobs'] as $key2 => $value2) {
                         $key3 = array_search($this->id, $value2);
-                        unset($districts[$jobKey]['jobs'][$key2][$key3]);
+                        array_splice($districts[$jobKey]['jobs'][$key2],$key3,1);
                         break 2;
                     }
                     break;
@@ -193,7 +190,7 @@ class PopController extends Controller {
                     $districts[$disKey]['jobs']['lowJob'][] = $this->id * 1;
                     foreach ($districts[$jobKey]['jobs'] as $key2 => $value2) {
                         $key3 = array_search($this->id, $value2);
-                        unset($districts[$jobKey]['jobs'][$key2][$key3]);
+                        array_splice($districts[$jobKey]['jobs'][$key2],$key3,1);
                         break 2;
                     }
                     break;

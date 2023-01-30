@@ -30,17 +30,8 @@ class PlanetController extends Controller {
             $this->id = $id;
             $this->name = $p ->name;
             $this->position = $p->position;
-            $this->type = $p->type;
-            $this->size = $p->size;
             $this->owner = $p->owner;
             $this->controller = $p->controller;
-            $this->pops = json_decode($p->pops,true);
-            $this->popGrowthProcess = $p->popGrowthProcess;
-            $this->districts = json_decode($p->districts,true);
-            $this->product = json_decode($p->product,true);
-            $this->nearTradeHub = $p->nearTradeHub;
-            $this->tradeHubDistance = $p->tradeHubDistance;
-            $this->leaderParty = $p->leaderParty;
         }
 
     }
@@ -253,10 +244,10 @@ class PlanetController extends Controller {
                     $this->districts[$key]['size'] = 0;
                     foreach ($this->districts[$key]['jobs'] as $key2 => $value2) {
                         foreach ($value2 as $key3 => $value3) {
-                            Population::where(["id" => $value3])->update(["job" => "无","class"=>"low","workat" => "无"]);
+                            Population::where(["id" => $value3])->update(["job" => "无", "class" => "low", "workat" => "无"]);
                         }
                     }
-                    unset($this->districts[$key]);
+                    array_splice($this->districts,$key,1);
                 }
                 else {
                     $this->districts[$key]['size'] -= 1;
@@ -613,7 +604,8 @@ class PlanetController extends Controller {
         }
         $depth=1;
         $isReached = false;
-        while(true){
+        $i = 0;
+        while($i<400){
             foreach($hyperLanes as $hyperLane){
                 $queue[] = [$hyperLane["to"],$depth];
                 if (in_array($hyperLane["to"],$hubArray)){
@@ -630,6 +622,7 @@ class PlanetController extends Controller {
                 $hyperLanes=json_decode($hyperLanes,true);
                 $depth=$start[1]+1;
             }
+            $i++;
         }
     }
     function searchTradeHub() {
@@ -647,9 +640,11 @@ class PlanetController extends Controller {
         }
         if (count($hubArray) != 0) {
             $ans = $this->searchNearestHub($hubArray);
-            $this->nearTradeHub = $ans[0];
-            $this->tradeHubDistance = $ans[1];;
-            $this->updatePlanet();
+            if (!is_null($ans)) {
+                $this->nearTradeHub = $ans[0];
+                $this->tradeHubDistance = $ans[1];;
+                $this->updatePlanet();
+            }
         }else {
             return 0;
         }
@@ -669,15 +664,30 @@ class PlanetController extends Controller {
         }else{
             $planets = Planet::paginate(16);
         }
-        $species = Species::get()->toArray();
-        $districts = District::get()->toArray();
         foreach ($planets as $planet) {
-            $planet['type'] = PlanetType::where('name',$planet['type'])->first()->localization;
+//            if (is_null($planet['energy'])) {
+//                $p = Planet::where("id",$planet['id'])->first();
+//                $resource = json_decode(Country::where("tag",$planet['owner'])->first()->resource,true);
+//                foreach ($resource as $key => $resource) {
+//                    Planet::where("id",$planet['id'])->update([$key => $resource*$p->weight]);
+//                }
+//            }
             $planet['position'] = Star::where(["id"=>$planet['position']])->first()->name;
-            $planet['pops']=json_decode($planet['pops'],true);
+            $planet['resource'] = [];
+            $planet['resource'] = array_merge($planet['resource'],["energy"=>$planet['energy']]);
+            $planet['resource'] = array_merge($planet['resource'],["minerals"=>$planet['minerals']]);
+            $planet['resource'] = array_merge($planet['resource'],["grain"=>$planet['grain']]);
+            $planet['resource'] = array_merge($planet['resource'],["consume_goods"=>$planet['consume_goods']]);
+            $planet['resource'] = array_merge($planet['resource'],["alloys"=>$planet['alloys']]);
+            $planet['resource'] = array_merge($planet['resource'],["gases"=>$planet['gases']]);
+            $planet['resource'] = array_merge($planet['resource'],["motes"=>$planet['motes']]);
+            $planet['resource'] = array_merge($planet['resource'],["crystals"=>$planet['crystals']]);
+            $planet['resource'] = array_merge($planet['resource'],["zro"=>$planet['zro']]);
+            $planet['resource'] = array_merge($planet['resource'],["satra"=>$planet['satra']]);
+
         }
         return view('planet',["user"=>$user,"privilege"=>$privilege,
-                                "planets"=>$planets,"species"=>$species,"districts"=>$districts]);
+                                "planets"=>$planets]);
     }
     public function adminNewPop(Request $request) {
         $uid = $request->session()->get('uid');
@@ -802,7 +812,7 @@ class PlanetController extends Controller {
             $pops = json_decode($planet->pops,true);
             foreach ($pops as $key=>$value) {
                 if ($value == $popid) {
-                    unset($pops[$key]);
+                    array_splice($pops,$key,1);
                     $planet->pops = json_encode($pops,JSON_UNESCAPED_UNICODE);
                     $planet->save();
                     break;
