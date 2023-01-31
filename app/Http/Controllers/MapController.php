@@ -35,7 +35,7 @@ class MapController extends Controller {
                     $armys = Army::get()->toArray();
                 } elseif ($privilege >=2) {
                     $allied = json_decode(Country::where(["tag"=>$country])->first()->alliedWith);
-                    $war = json_decode(Country::where(["tag"=>$country])->first()->alliedWith);
+                    $war = json_decode(Country::where(["tag"=>$country])->first()->atWarWith);
                     $fleets = Fleet::where(["owner"=>$country])->get()->toArray();
                     $armys = Army::where(["owner"=>$country])->get()->toArray();
                     foreach ($stars as $star) {
@@ -45,6 +45,7 @@ class MapController extends Controller {
                         }
                     }
                 }
+                $j = 0;
                 return view("map",["stars"=>$stars,"countrys"=>$countries,
                     "stations"=>$stations,"planets"=>$planets,
                     "planetTypes"=>$planetTypes,
@@ -53,6 +54,7 @@ class MapController extends Controller {
                     "allied"=>$allied,
                     "war" => $war,
                     "selfCountry"=>$country,
+                    "j"=>$j,
                     "privilege"=>$privilege]);
             }
         }else {

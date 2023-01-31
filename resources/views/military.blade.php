@@ -11,6 +11,14 @@
 <div class="container my-4">
     <h1 class="text-center">舰队</h1>
 </div>
+@if($privilege == 0)
+    <div class="row">
+        <div class="col-2">
+            <input type="text" class="form-control" id="battle" style="display: inline"/>
+            <button type="button" class="btn btn-light" onclick="battle()">打</button>
+        </div>
+    </div>
+@endif
 <div class="container my-4 py-4 rounded shadow-lg" style="background: #FFFFFF">
     <ul class="list-group list-group-flush">
         <li class="list-group-item">
@@ -27,10 +35,10 @@
             <li class="list-group-item">
                 <div class="row">
                     @if($privilege==3)
-                        <p class="col-2 text-center">{{$fleet['name']}}</p>
+                        <img src="storage/img/countries/{{$fleet['owner']}}.png" width="25px" style="display: inline"><p class="col-2 text-center">{{$fleet['name']}}</p>
                     @else
                         <div class="col-2">
-                            <input type="text" class="form-control" id="fleetName-{{$fleet['id']}}" value="{{$fleet['name']}}" onchange="changeFleetName({{$fleet['id']}})"/>
+                            <img src="storage/img/countries/{{$fleet['owner']}}.png" width="25px" style="display: inline"><input type="text" class="form-control" id="fleetName-{{$fleet['id']}}" value="{{$fleet['name']}}" onchange="changeFleetName({{$fleet['id']}})"/>
                         </div>
                     @endif
                     <p class="col-2 text-center">{{$fleet['position']}}</p>
@@ -87,10 +95,10 @@
             <li class="list-group-item">
                 <div class="row">
                     @if($privilege==3)
-                        <p class="col-2 text-center">{{$army['name']}}</p>
+                        <img src="storage/img/countries/{{$army['owner']}}.png" width="25px" style="display: inline"><p class="col-2 text-center">{{$army['name']}}</p>
                     @else
                         <div class="col-2">
-                            <input type="text" class="form-control" id="armyName-{{$army['id']}}" value="{{$army['name']}}" onchange="changeArmyName({{$army['id']}})"/>
+                            <img src="storage/img/countries/{{$army['owner']}}.png" width="25px" style="display: inline"><input type="text" class="form-control" id="armyName-{{$army['id']}}" value="{{$army['name']}}" onchange="changeArmyName({{$army['id']}})"/>
                         </div>
                     @endif
                     <p class="col-2 text-center">{{$army['position']}}</p>

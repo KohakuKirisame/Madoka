@@ -85,6 +85,7 @@ class MilitaryController extends Controller{
                     "shipComputerModifier"=>0];
             }
         }
+//        var_dump($dataArr);
 //////////
         $result = Fleet::get(["id", "owner"]);//$conn->query("SELECT id,owner FROM Fleet");
         $fleetsOwner = [];
@@ -105,7 +106,8 @@ class MilitaryController extends Controller{
             $computers[$key][1] = json_decode($value[1], true);
         }
 //////////
-        while (count($dataArr) > 1) {
+        $k = 0;
+        while ($k<400) {
             $damageBullet = array();
             foreach ($dataArr as $allyKey => $fleetsInBattle) {
                 $damageBullet[$allyKey] = array();
@@ -216,7 +218,7 @@ class MilitaryController extends Controller{
                                                     ///撤退///
                                                     $owner = Fleet::where(["id"=>$fleets[$allyKey2][$enemyFleetKey]])->first()->owner;
                                                     $cap = Country::where(["tag" => $owner])->first()->capital;//$conn->query("SELECT capital FROM Country WHERE id='$owner'")
-                                                    $result = Fleet::where(["id" =>$fleets[$allyKey2][$enemyFleetKey]])->update(["position" => $cap]);//$conn->query("UPDATE Fleet SET position=$cap WHERE id=$id");
+                                                    Fleet::where(["id" =>$fleets[$allyKey2][$enemyFleetKey]])->update(["position" => $cap,"hull"=>$dataArr[$allyKey2][$enemyFleetKey]['hull']]);//$conn->query("UPDATE Fleet SET position=$cap WHERE id=$id");
                                                     echo "!".$fleets[$allyKey2][$enemyFleetKey]."!";
                                                     break 4;
                                                 } else {
@@ -229,7 +231,7 @@ class MilitaryController extends Controller{
                                                         ///撤退///
                                                         $owner = Fleet::where(["id"=>$fleets[$allyKey2][$enemyFleetKey]])->first()->owner;
                                                         $cap = Country::where(["tag" => $owner])->first()->capital;//$conn->query("SELECT capital FROM Country WHERE id='$owner'")
-                                                        $result = Fleet::where(["id" =>$fleets[$allyKey2][$enemyFleetKey]])->update(["position" => $cap]);//$conn->query("UPDATE Fleet SET position=$cap WHERE id=$id");
+                                                        Fleet::where(["id" =>$fleets[$allyKey2][$enemyFleetKey]])->update(["position" => $cap,"hull"=>$dataArr[$allyKey2][$enemyFleetKey]['hull']]);//$conn->query("UPDATE Fleet SET position=$cap WHERE id=$id");
                                                         echo "!".$fleets[$allyKey2][$enemyFleetKey]."!";
                                                         break 4;
                                                     } else {
@@ -249,7 +251,7 @@ class MilitaryController extends Controller{
                                             ///撤退///
                                             $owner = Fleet::where(["id"=>$fleets[$allyKey2][$enemyFleetKey]])->first()->owner;
                                             $cap = Country::where(["tag" => $owner])->first()->capital;//$conn->query("SELECT capital FROM Country WHERE id='$owner'")
-                                            $result = Fleet::where(["id" =>$fleets[$allyKey2][$enemyFleetKey]])->update(["position" => $cap]);//$conn->query("UPDATE Fleet SET position=$cap WHERE id=$id");
+                                            Fleet::where(["id" =>$fleets[$allyKey2][$enemyFleetKey]])->update(["position" => $cap,"hull"=>$dataArr[$allyKey2][$enemyFleetKey]['hull']]);//$conn->query("UPDATE Fleet SET position=$cap WHERE id=$id");
                                             echo "!".$fleets[$allyKey2][$enemyFleetKey]."!";
                                             break 4;
                                         }
@@ -272,6 +274,7 @@ class MilitaryController extends Controller{
                     }
                 }
             }
+            $k++;
         }
         foreach ($dataArr as $allyKey => $fleetInBattle) {
             foreach ($fleetInBattle as $fleetKey => $fleetData) {
@@ -279,7 +282,11 @@ class MilitaryController extends Controller{
                     foreach ($fleets[$allyKey] as $fleetAllyKey => $fleetAllyValue) {
                         $f = Fleet::where(['id' => $fleetAllyValue])->first();
                         $ships = json_decode($f->ships, true);
-                        while (count($ships) > 1) {
+                        $hull = $f->hull;
+                        $this->fleetCount($f->id);
+                        $f = Fleet::where(['id' => $fleetAllyValue])->first();
+                        $shipNum = $hull/$f->hull;
+                        while (count($ships) > $shipNum) {
                             $shipKey = array_rand($ships, 1);
                             $shipID = $ships[$shipKey];
                             array_splice($ships,$shipKey,1);
@@ -474,6 +481,17 @@ class MilitaryController extends Controller{
         $name = $request->input("name");
         Ship::where('id', $id)->update(["name"=>$name]);
     }
+    public function changeFleetWeaponA(Request $request) {
+        $id = $request->input('id');
+        $weaponA = $request->input("weaponA");
+        echo $weaponA;
+        Fleet::where('id', $id)->update(["weaponA"=>$weaponA]);
+    }
+    public function changeFleetWeaponB(Request $request) {
+        $id = $request->input('id');
+        $weaponB = $request->input("weaponB");
+        Fleet::where('id', $id)->update(["weaponB"=>$weaponB]);
+    }
     public function changeFleetComputer(Request $request) {
         $id = $request->input('id');
         $computer = $request->input("computer");
@@ -508,16 +526,21 @@ class MilitaryController extends Controller{
         } elseif ($privilege == 2) {
             $country = Country::where(["tag"=>$fleet->owner])->first();
             $shipType = ShipType::where(["type"=>$type])->first();
-
-            $ship = new Ship();
-            $ship->name = $type;
-            $ship->owner = $fleet->owner;
-            $ship->shipType = $type;
-            $ship->save();
-            $ships = json_decode($fleet->ships,true);
-            $ships[] = $ship->id;
-            $fleet->ships = json_encode($ships,JSON_UNESCAPED_UNICODE);
-            $fleet->save();
+            $resource = json_decode($country->resource,true);
+            if ($resource['alloys']-$shipType->baseUpkeep >=0) {
+                $ship = new Ship();
+                $ship->name = $type;
+                $ship->owner = $fleet->owner;
+                $ship->shipType = $type;
+                $ship->save();
+                $ships = json_decode($fleet->ships,true);
+                $ships[] = $ship->id;
+                $fleet->ships = json_encode($ships,JSON_UNESCAPED_UNICODE);
+                $fleet->save();
+                $resource['alloys']-=$shipType->baseUpkeep;
+            }
+            $country->resource = json_encode($resource,JSON_UNESCAPED_UNICODE);
+            $country->save();
         }
         $this->fleetCount($id);
     }
@@ -542,7 +565,7 @@ class MilitaryController extends Controller{
         $country = $MadokaUser->country;
         $fleet1 = Fleet::where(["id"=>$request->input('id1')])->first()->toArray();
         $fleet2 = Fleet::where(["id"=>$request->input('id2')])->first()->toArray();
-        if (($privilege == 2 && $fleet1['owner'] == $country && $fleet2['owner'] == $country) || $privilege <= 1) {
+        if (($privilege == 2 && $fleet1['owner'] == $country && $fleet2['owner'] == $country && $fleet1['position']==$fleet2['position']) || $privilege <= 1) {
             $fleet1['ships'] = json_decode($fleet1['ships'], true);
             $fleet2['ships'] = json_decode($fleet2['ships'], true);
             foreach ($fleet2['ships'] as $value) {
@@ -565,25 +588,28 @@ class MilitaryController extends Controller{
         if ($request->input('f1') == $request->input('f2')) {
             return;
         }
-        if (($privilege == 2 && $fleet1['owner'] == $country && $fleet2['owner'] == $country &&$fleet1['id']!=$fleet2['id']) || $privilege <= 1) {
+        if (($privilege == 2 && $fleet1['owner'] == $country && $fleet2['owner'] == $country && $fleet1['id']!=$fleet2['id']&& $fleet1['position']==$fleet2['position']) || $privilege <= 1) {
             $fleet1['ships'] = json_decode($fleet1['ships'], true);
             $fleet2['ships'] = json_decode($fleet2['ships'], true);
             if (in_array($ship,$fleet1['ships'])) {
-                $fleet2['ships'][] = $ship;
+                $fleet2['ships'][] = $ship*1;
                 foreach($fleet1['ships'] as $key => $value) {
                     if ($ship == $value) {
+                        $s = Ship::where(["id"=>$ship])->first();
+                        $s->owner = $fleet2['owner'];
+                        $s->save();
                         array_splice($fleet1['ships'],$key,1);
                         break;
                     }
                 }
             }
+            $fleet1['ships'] = json_encode($fleet1['ships'], JSON_UNESCAPED_UNICODE);
+            $fleet2['ships'] = json_encode($fleet2['ships'], JSON_UNESCAPED_UNICODE);
+            Fleet::where(["id"=>$fleet1['id']])->update(["ships"=>$fleet1['ships']]);
+            Fleet::where(["id"=>$fleet2['id']])->update(["ships"=>$fleet2['ships']]);
+            $this->fleetCount($fleet1['id']);
+            $this->fleetCount($fleet2['id']);
         }
-        $this->fleetCount($fleet1['id']);
-        $this->fleetCount($fleet2['id']);
-        $fleet1['ships'] = json_encode($fleet1['ships'], JSON_UNESCAPED_UNICODE);
-        $fleet2['ships'] = json_encode($fleet2['ships'], JSON_UNESCAPED_UNICODE);
-        Fleet::where(["id"=>$fleet1['id']])->update(["ships"=>$fleet1['ships']]);
-        Fleet::where(["id"=>$fleet2['id']])->update(["ships"=>$fleet2['ships']]);
     }
     public function fleetDelete(Request $request) {
         $uid = $request->session()->get('uid');
@@ -665,27 +691,30 @@ class MilitaryController extends Controller{
                 $starNow = Star::where("id", $army->position)->first();
                 $country = Country::where("tag", $army->owner)->first();
                 $war = json_decode($country->atWarWith,true);
-                if (in_array($starNow->controller,$war)) {
+                if (in_array($starNow->owner,$war)) {
                     $army->moving = '[]';
                     return;
                 } else {
+                    if(count($moving) == 0) {
+                        return;
+                    }
                     $army->position = array_shift($moving);
                     $army->moving = json_encode($moving,JSON_UNESCAPED_UNICODE);
-/*                    if ($starNow->controller == $army->owner && $starNow->havePlanet == 1) {
-//                        echo $army->position;
-//                        $planet = Planet::where(["position"=>$army->position])->first();
-//                        if (!is_null($planet) && $planet->controller != $army->controller) {
-//                            $enemy = Army::where(["position"=>$army->position])->first();
-//                            if (!is_null($enemy)) {
-////                                $this->armyBattle($army->id,$enemy->id);
-//                                $enemy = Army::where(["position"=>$army->position])->first();
-//                                if (is_null($enemy)) {
-//                                    $planet->controller = $army->owner;
-//                                    $planet->save();
-//                                }
-//                            }
-//                        }
-//                    }*/
+                   if ($starNow->owner == $army->owner && $starNow->havePlanet == 1) {
+                        echo $army->position;
+                        $planet = Planet::where(["position"=>$army->position])->first();
+                        if (!is_null($planet) && $planet->controller != $army->controller) {
+                            $enemy = Army::where(["position"=>$army->position])->first();
+                            if (!is_null($enemy)) {
+//                                $this->armyBattle($army->id,$enemy->id);
+                                $enemy = Army::where(["position"=>$army->position])->first();
+                                if (is_null($enemy)) {
+                                    $planet->owner = $army->owner;
+                                    $planet->save();
+                                }
+                            }
+                        }
+                    }
                     $army->save();
                 }
             }
@@ -698,7 +727,7 @@ class MilitaryController extends Controller{
             } else {
                 $jump = $fleet->speed/100;
                 while ($jump > 0 && count($moving) > 0) {
-                    $starController = Star::where(["id"=>$fleet->position])->first()->controller;
+                    $starController = Star::where(["id"=>$fleet->position])->first()->owner;
                     $country = Country::where("tag", $fleet->owner)->first();
                     $war = json_decode($country->atWarWith,true);
                     if (in_array($starController,$war)) {
@@ -707,13 +736,13 @@ class MilitaryController extends Controller{
                         foreach ($fleets as $item) {
                             $fleetInThis[] = $item['id'];
                         }
-                        $this->spaceBattle($fleetInThis);
+//                        $this->spaceBattle($fleetInThis);
                         $fleet = Fleet::where("id", $id)->first();
-                        $starController = Star::where("id", $fleet->position)->first()->controller;
+                        $starController = Star::where("id", $fleet->position)->first()->owner;
                         $country = Country::where("tag", $fleet->owner)->first();
                         $war = json_decode($country->atWarWith,true);
                         if (in_array($starController,$war)) {
-                            Star::where(["id"=>$fleet->position])->update(["controller"=>$fleet->owner]);
+                            Star::where(["id"=>$fleet->position])->update(["owner"=>$fleet->owner]);
                             $fleet->position = array_shift($moving);
                         }
                     } else {
@@ -783,6 +812,7 @@ class MilitaryController extends Controller{
             $fleet = Fleet::where(["id"=>$id])->first();
             if (($MadokaUser->country == $fleet->owner && $privilege == 2) || $privilege <= 1) {
                 $route = $this->moveBFS($fleet->position,$targetID);
+                array_shift($route);
                 $route = json_encode($route,JSON_UNESCAPED_UNICODE);
                 $fleet->moving = $route;
                 $fleet->save();
@@ -791,13 +821,22 @@ class MilitaryController extends Controller{
             $army = Army::where(["id"=>$id])->first();
             if (($MadokaUser->country == $army->owner && $privilege == 2) || $privilege <= 1) {
                 $route = $this->moveBFS($army->position,$targetID);
+                array_shift($route);
                 $route = json_encode($route,JSON_UNESCAPED_UNICODE);
                 $army->moving = $route;
                 $army->save();
             }
         }
-
+    }
+    public function Battle(Request $request) {
+        $uid = $request->session()->get('uid');
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        if ($privilege == 0) {
+            $fleets = json_decode($request->input('fleets'),true);
+            $this->spaceBattle($fleets);
+        }
     }
 }
 //$mili = new MilitaryController();
-//$mili->spaceBattle([8,18,19]);
+//$mili->spaceBattle([218,221]);

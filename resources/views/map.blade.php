@@ -26,6 +26,7 @@
             $y = $stars[$i]['y']*3+960;
 			$country = $stars[$i]['owner'];
 			$type = $stars[$i]['type'];
+			$k = 0;
         @endphp
         @foreach($countrys as $key => $value)
             @if($value['tag'] == $country)
@@ -202,7 +203,7 @@
             @if($value['position'] == $stars[$i]['id'])
                 <button class='btn btn-default'
                     style='position: absolute;
-                        top: {{$y-25}}px; left: {{$x-30}}px; width: 20px;height: 20px;
+                        top: {{$y-25}}px; left: {{$x-30-7*($k)}}px; width: 20px;height: 20px;top: {{$y-25}}px; left: {{$x-30-10*($k)}}px; width: 20px;height: 20px;
                         border-radius: 100%;
                         background-color:hsla(0,0%,0%,0);
                         border:none ;
@@ -212,7 +213,7 @@
                     data-bs-placement='top'
                     data-bs-container ='body'
                     data-bs-html='true'
-                    title={{$value['name']}}
+                    title={{$value['id']}}-{{$value['name']}}
                     data-bs-content='隶属于{{$value['owner']}}<br>舰队实力{{$value['power']}}'>
                     @if($value['owner'] == $selfCountry)
                         <img src='storage/img/military/fleet_green.png' width='20px' />
@@ -224,17 +225,20 @@
                         <img src='storage/img/military/fleet_yellow.png' width='20px' />
                     @endif
                 </button>
+                @php
+                    $k+=1;
+                @endphp
             @endif
         @endforeach
         @foreach($armys as $key=>$value)
             @if($value['position'] == $stars[$i]['id'])
                 <button class='btn btn-default'
                         style='position: absolute;
-                    top: {{$y-25}}px; left: {{$x-30}}px; width: 20px;height: 20px;
-                    border-radius: 100%;
-                    background-color:hsla(0,0%,0%,0.00);
-                    border:none ;
-                    padding:0px 0px'
+                        top: {{$y-25}}px; left: {{$x-30-7*($k)}}px; width: 20px;height: 20px;
+                        border-radius: 100%;
+                        background-color:hsla(0,0%,0%,0.00);
+                        border:none ;
+                        padding:0px 0px'
                         data-bs-toggle='popover'
                         data-bs-trigger='hover'
                         data-bs-placement='top'
@@ -252,6 +256,9 @@
                         <img src='storage/img/military/army_yellow.png' width='20px' />
                     @endif
                 </button>
+                @php
+                    $k+=1;
+                @endphp
             @endif
         @endforeach
     @endfor

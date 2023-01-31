@@ -37,6 +37,30 @@ function changeFleetComputer(id) {
         computer : computer,
     },function() {});
 }
+function changeFleetWeaponA(id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let weaponA = $("#weaponA-" + id).val();
+    $.post('/Action/ChangeFleetWeaponA',{
+        id : id,
+        weaponA:weaponA,
+    },function() {});
+}
+function changeFleetWeaponB(id) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let weaponB = $("#weaponB-" + id).val();
+    $.post('/Action/ChangeFleetWeaponB',{
+        id : id,
+        weaponB:weaponB,
+    },function() {});
+}
 function changeFleetFTL(id) {
     $.ajaxSetup({
         headers: {
@@ -59,7 +83,7 @@ function newShip(type) {
         id : nowControlling,
         type : type,
     },function() {
-        location.reload();
+        // location.reload();
     });
 }
 function getFleets(type,id) {
@@ -221,21 +245,20 @@ function readFleet(id) {
         $('#PDamage').html(data['PDamage']);
         $('#armor').html(data['armor']);
         $('#shield').html(data['shield']);
-        $('#evasion').html(data['evasion']);
-        $('#speed').html(data['speed']);
+        $('#evasion').html(Math.round(data['evasion']*100)/100);
+        $('#speed').html(Math.round(data['speed']));
         $('#power').html(data['power']);
         $('#weaponA').empty();
         $('#weaponB').empty();
         if (data['weaponA'] == 1) {
-            $('#weaponA').append("<select class=\"form-select\" aria-label=\"weaponASelect\" id=\"weaponA-"+id+"\" onChange=\"changeFleetComputer("+id+",\"A\")\"><option value=\"1\" selected>能量武器</option><option value=\"2\">动能武器</option></select>");
-
+            $('#weaponA').append("<select class=\"form-select\" aria-label=\"weaponASelect\" id=\"weaponA-"+id+"\" onChange=\"changeFleetWeaponA("+id+",'A')\"><option value=\"1\" selected>能量武器</option><option value=\"2\">动能武器</option></select>");
         } else {
-            $('#weaponA').append("<select class=\"form-select\" aria-label=\"weaponASelect\" id=\"weaponA-"+id+"\" onChange=\"changeFleetComputer("+id+",\"A\")\"><option value=\"2\" selected>动能武器</option><option value=\"1\">能量武器</option></select>");
+            $('#weaponA').append("<select class=\"form-select\" aria-label=\"weaponASelect\" id=\"weaponA-"+id+"\" onChange=\"changeFleetWeaponA("+id+",'A')\"><option value=\"2\" selected>动能武器</option><option value=\"1\">能量武器</option></select>");
         }
         if (data['weaponB'] == 1) {
-            $('#weaponB').append("<select class=\"form-select\" aria-label=\"weaponBSelect\" id=\"weaponB-"+id+"\" onChange=\"changeFleetComputer("+id+",\"B\")\"><option value=\"1\" selected>能量武器</option><option value=\"2\">动能武器</option></select>");
+            $('#weaponB').append("<select class=\"form-select\" aria-label=\"weaponBSelect\" id=\"weaponB-"+id+"\" onChange=\"changeFleetWeaponB("+id+",'B')\"><option value=\"1\" selected>能量武器</option><option value=\"2\">动能武器</option></select>");
         } else {
-            $('#weaponB').append("<select class=\"form-select\" aria-label=\"weaponBSelect\" id=\"weaponB-"+id+"\" onChange=\"changeFleetComputer("+id+",\"B\")\"><option value=\"2\" selected>动能武器</option><option value=\"1\">能量武器</option></select>");
+            $('#weaponB').append("<select class=\"form-select\" aria-label=\"weaponBSelect\" id=\"weaponB-"+id+"\" onChange=\"changeFleetWeaponB("+id+",'B')\"><option value=\"2\" selected>动能武器</option><option value=\"1\">能量武器</option></select>");
         }
         for (var key in data['shipList']) {
             $('#shipList').append("<div class='row'>" +
@@ -250,5 +273,18 @@ function readFleet(id) {
         }
         const fleetModal = new bootstrap.Modal("#fleetModal");
         fleetModal.show();
+    });
+}
+function battle(){
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let fleets = $('#battle').val();
+    $.post('/Action/Battle', {
+        fleets : fleets,
+    },function(){
+
     });
 }

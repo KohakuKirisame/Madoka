@@ -75,6 +75,8 @@ Route::prefix("Action")->group(function () {
     Route::post("/ReadFleet", [MilitaryController::class, "readFleet"])->middleware("isAuthedByReimu");
     Route::post("/ChangeFleetName", [MilitaryController::class, "changeFleetName"])->middleware("isAuthedByReimu");
     Route::post("/ChangeShipName", [MilitaryController::class, "changeShipName"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeFleetWeaponA", [MilitaryController::class,"changeFleetWeaponA"])->middleware("isAuthedByReimu");
+    Route::post("/ChangeFleetWeaponB", [MilitaryController::class,"changeFleetWeaponB"])->middleware("isAuthedByReimu");
     Route::post("/ChangeFleetComputer", [MilitaryController::class, "changeFleetComputer"])->middleware("isAuthedByReimu");
     Route::post("/ChangeFleetFTL", [MilitaryController::class, "changeFleetFTL"])->middleware("isAuthedByReimu");
     Route::post("/NewShip", [MilitaryController::class, "newShip"])->middleware("isAuthedByReimu");
@@ -96,6 +98,9 @@ Route::prefix("Action")->group(function () {
     Route::post("/ReadMarket",[MarketController::class,"readMarket"])->middleware("isAuthedByReimu");
     Route::post("/NewTrade",[MarketController::class,"newTrade"])->middleware("isAuthedByReimu");
     Route::post("/DeleteTrade",[MarketController::class,"deleteTrade"])->middleware("isAuthedByReimu");
+
+    Route::post("/UpdateRes",[PlanetController::class,"updateRes"])->middleware("isAuthedByReimu");
+    Route::post("/Battle",[MilitaryController::class,"Battle"])->middleware("isAuthedByReimu");
 });
 
 

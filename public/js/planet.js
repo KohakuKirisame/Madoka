@@ -95,6 +95,20 @@ function planetCount(id) {
         readPlanet(id,0);
     });
 }
+function updateRes(id,res) {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    let $val = $("#planet-"+id+"-"+res).val();
+    $.post('/Action/UpdateRes',{
+        id : id,
+        res : res,
+        val : $val,
+    },function(data) {
+    });
+}
 function readPlanet(id,privilege){
     $.ajaxSetup({
         headers: {

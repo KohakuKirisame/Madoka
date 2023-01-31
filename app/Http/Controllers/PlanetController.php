@@ -774,8 +774,8 @@ class PlanetController extends Controller {
         } elseif ($privilege ==2) {
             $country = $MadokaUser->country;
             $Country = Country::where('tag', $country)->first();
-            if ($country= $planet->owner) {
-                $Country->energy -= 100;
+            $resource = json_decode($Country->resource,true);
+            if ($resource['energy']>1) {
                 if (is_null($army)) {
                     $armyNew = new Army();
                     $armyNew->position = $planet->position;
@@ -793,6 +793,9 @@ class PlanetController extends Controller {
                     $army->save();
                 }
             }
+            $resource['energy']-=1;
+            $Country->resource = json_encode($resource,JSON_UNESCAPED_UNICODE);
+            $Country->save();
         }
     }
     public function adminDeletePop(Request $request) {
@@ -843,6 +846,23 @@ class PlanetController extends Controller {
             $m = new MarketController($planet->owner);
             $m->priceCount();
             $m->updateMarket();
+        }
+    }
+    public function updateRes(Request $request) {
+        $uid = $request->session()->get('uid');
+        $user= UserController::GetInfo($uid);
+        if(key_exists('Err',$user)){
+            return redirect('/Action/Logout');
+        }
+        $MadokaUser = User::where(["uid"=>$uid])->first();
+        $privilege = $MadokaUser->privilege;
+        $id = $request->input('id');
+        $res = $request->input('res');
+        $val = $request->input('val');
+        if ($privilege <=1) {
+            $p = Planet::where('id',$id)->first();
+            $p->$res = $val;
+            $p->save();
         }
     }
 }

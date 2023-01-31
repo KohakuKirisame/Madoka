@@ -124,7 +124,7 @@ class CountryController
                 array_splice($techList,$key,1);
                 break;
             }
-            $process = random_int(100,1000);
+            $process = random_int(100,500);
             $process *= 1+$ethicsM/400;
             $process *= 1-$ethicsAM/400;
             $techList[$key]['process'] += $process;
@@ -223,15 +223,14 @@ class CountryController
     public function mainFunction($id) {
         ini_set("display_errors", "On");
         ini_set("error_reporting", E_ALL);
-        $planets = json_decode(Country::where('tag', $id)->first()->planets,true);
+        $planets = Planet::where("owner",$id)->get()->toArray();
         $resource = json_decode(Country::where('tag', $id)->first()->resource,true);
+        foreach($resource as $key => $value) {
+            $resource[$key] = 0;
+        }
         foreach($planets as $planet) {
-            $p = Planet::where('id', $planet)->first();
             foreach($resource as $key => $value) {
-                $resource[$key] = 0;
-            }
-            foreach($resource as $key => $value) {
-                $resource[$key] += $p->$key;
+                $resource[$key] += $planet[$key];
             }
         }
         $ships = Ship::where('owner',$id)->get()->toArray();

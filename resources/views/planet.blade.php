@@ -17,26 +17,46 @@
             <div class="row">
                 <h5 class="col-3 text-center">星球</h5>
                 <h5 class="col-3 text-center">位置</h5>
-                <h5 class="col-6 text-center">星球结余</h5>
+                <h5 class="col-4 text-center">星球结余</h5>
+                <h5 class="col-2 text-center">操作</h5>
             </div>
         </li>
         @foreach($planets as $planet)
         <li class="list-group-item">
             <div class="row">
                 @if($privilege==3)
-                    <p class="col-3 text-center">{{$planet['name']}}</p>
+                    <img src="storage/img/countries/{{$planet['owner']}}.png" width="50px" style="display: inline"><p class="col-3 text-center">{{$planet['name']}}</p>
                 @else
                 <div class="col-3">
-                    <input type="text" class="form-control" id="planetName-{{$planet['id']}}" value="{{$planet['name']}}" onchange="changePlanetName({{$planet['id']}})"/>
+
+                    <img src="storage/img/countries/{{$planet['owner']}}.png" width="50px" style="display: inline"><input type="text" class="form-control" id="planetName-{{$planet['id']}}" value="{{$planet['name']}}" onchange="changePlanetName({{$planet['id']}})" style="display: inline"/>
                 </div>
                 @endif
                 <p class="col-3 text-center">{{$planet['position']}}</p>
                 <p class="col-4 text-center">
                     @foreach($planet['resource'] as $key=>$value)
                         @if($value>0)
-                            <span class="badge bg-success text-dark"><img src="storage/img/resource/{{$key}}.png" width="20px">{{$value}}</span>
+                            <span class="badge bg-success text-dark" style="width: 15%"><img src="storage/img/resource/{{$key}}.png" width="20px">
+                                @if($privilege <= 1)
+                                    <input class="form-control form-control-sm" type="text" id="planet-{{$planet['id']}}-{{$key}}" value="{{round($value,1)}}" onchange="updateRes({{$planet['id']}},'{{$key}}')">
+                                @else
+                                    {{$value}}
+                                @endif
+                            </span>
                         @elseif($value<0)
-                            <span class="badge bg-danger text-dark"><img src="storage/img/resource/{{$key}}.png" width="20px">{{$value}}</span>
+                            <span class="badge bg-danger text-dark" style="width: 15%"><img src="storage/img/resource/{{$key}}.png" width="20px">
+                                @if($privilege <= 1)
+                                    <input class="form-control form-control-sm" type="text" id="planet-{{$planet['id']}}-{{$key}}" value="{{round($value,1)}}" onchange="updateRes({{$planet['id']}},'{{$key}}')">
+                                @else
+                                    {{$value}}
+                                @endif
+                            </span>
+                        @else
+                            @if ($privilege <=1)
+                                <span class="badge bg-danger text-dark" style="width: 15%"><img src="storage/img/resource/{{$key}}.png" width="20px">
+                                    <input class="form-control form-control-sm" type="text" id="planet-{{$planet['id']}}-{{$key}}" value="{{round($value,1)}}" onchange="updateRes({{$planet['id']}},'{{$key}}')">
+                                </span>
+                            @endif
                         @endif
                     @endforeach
                 </p>
