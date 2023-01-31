@@ -58,14 +58,14 @@ function buildMarketDistrict(district) {
         district : district,
     },function() {});
 }
-function buildArmy() {
+function buildArmy(id) {
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
     $.post('/Action/BuildArmy',{
-        id : nowControlling,
+        id : id,
     },function(data) {
     });
 }

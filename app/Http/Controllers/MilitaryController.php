@@ -303,7 +303,7 @@ class MilitaryController extends Controller{
         $army2FullHP = $army2['HP']*(1+($country2['armyHPModifier']));
         $army2['HP'] = $army2FullHP;
         $army2['damage'] *= 1+($country2['armyDamageModifier']);
-        while ($army1['HP']>0 && $army2['HP']>0) {
+        while ($army1['HP']>0|| $army2['HP']>0) {
             $army2['HP'] -= $army1['damage'];
             $army1['HP'] -= $army2['damage'];
             $army1['quantity'] = round($army1['HP']/$army1FullHP);
@@ -460,7 +460,7 @@ class MilitaryController extends Controller{
         }
         $output = ["name"=>$fleet->name,"hull"=>$fleet->hull,"EDamage"=>$fleet->EDamage,"PDamage"=>$fleet->PDamage,
                 "armor"=>$fleet->armor,"shield"=>$fleet->shield,"evasion"=>$fleet->evasion,"speed"=>$fleet->speed,
-                "shipList"=>$shipList,"weaponA"=>$fleet->weaponA,"weaponB"=>$fleet->weaponB];
+                "shipList"=>$shipList,"weaponA"=>$fleet->weaponA,"weaponB"=>$fleet->weaponB,"power"=>$fleet->power];
         $output = json_encode($output);
         return $output;
     }
@@ -508,6 +508,7 @@ class MilitaryController extends Controller{
         } elseif ($privilege == 2) {
             $country = Country::where(["tag"=>$fleet->owner])->first();
             $shipType = ShipType::where(["type"=>$type])->first();
+
             $ship = new Ship();
             $ship->name = $type;
             $ship->owner = $fleet->owner;
@@ -670,20 +671,21 @@ class MilitaryController extends Controller{
                 } else {
                     $army->position = array_shift($moving);
                     $army->moving = json_encode($moving,JSON_UNESCAPED_UNICODE);
-                    if ($starNow->controller == $army->owner && $starNow->havePlanet == 1) {
-                        $planet = Planet::where(["position"=>$army->position])->first();
-                        if ($planet->controller != $army->controller) {
-                            $enemy = Army::where(["position"=>$army->position])->first();
-                            if (!is_null($enemy)) {
-                                $this->armyBattle($army->id,$enemy->id);
-                                $enemy = Army::where(["position"=>$army->position])->first();
-                                if (is_null($enemy)) {
-                                    $planet->controller = $army->owner;
-                                    $planet->save();
-                                }
-                            }
-                        }
-                    }
+/*                    if ($starNow->controller == $army->owner && $starNow->havePlanet == 1) {
+//                        echo $army->position;
+//                        $planet = Planet::where(["position"=>$army->position])->first();
+//                        if (!is_null($planet) && $planet->controller != $army->controller) {
+//                            $enemy = Army::where(["position"=>$army->position])->first();
+//                            if (!is_null($enemy)) {
+////                                $this->armyBattle($army->id,$enemy->id);
+//                                $enemy = Army::where(["position"=>$army->position])->first();
+//                                if (is_null($enemy)) {
+//                                    $planet->controller = $army->owner;
+//                                    $planet->save();
+//                                }
+//                            }
+//                        }
+//                    }*/
                     $army->save();
                 }
             }
@@ -694,8 +696,8 @@ class MilitaryController extends Controller{
             if (count($moving) == 0) {
                 return;
             } else {
-                $jump = intval($fleet->speed/100);
-                while ($jump > 0) {
+                $jump = $fleet->speed/100;
+                while ($jump > 0 && count($moving) > 0) {
                     $starController = Star::where(["id"=>$fleet->position])->first()->controller;
                     $country = Country::where("tag", $fleet->owner)->first();
                     $war = json_decode($country->atWarWith,true);
@@ -715,7 +717,11 @@ class MilitaryController extends Controller{
                             $fleet->position = array_shift($moving);
                         }
                     } else {
+//                    var_dump($moving);
                         $fleet->position = array_shift($moving);
+                        if(count($moving) == 0) {
+                        break;
+                        }
                     }
                     $jump -= 1;
                 }

@@ -108,7 +108,7 @@
 </div>
 @include('components.footer')
 <div class="modal fade" id="fleetModal" tabindex="-1" aria-labelledby="fleetModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="fleetName"></h5>
@@ -121,26 +121,26 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item">
                                 <div class="row">
-                                    <h6 class="col text-center">船体</h6>
-                                    <h6 class="col text-center">能量伤害</h6>
-                                    <h6 class="col text-center">动能伤害</h6>
-                                    <h6 class="col text-center">装甲</h6>
-                                    <h6 class="col text-center">护盾</h6>
-                                    <h6 class="col text-center">闪避</h6>
-                                    <h6 class="col text-center">速度</h6>
-                                    <h6 class="col text-center">战力</h6>
+                                    <h6 class="col-3 text-center">船体</h6>
+                                    <h6 class="col-1 text-center">能量伤害</h6>
+                                    <h6 class="col-1 text-center">动能伤害</h6>
+                                    <h6 class="col-1 text-center">装甲</h6>
+                                    <h6 class="col-1 text-center">护盾</h6>
+                                    <h6 class="col-1 text-center">闪避</h6>
+                                    <h6 class="col-1 text-center">速度</h6>
+                                    <h6 class="col-3 text-center">战力</h6>
                                 </div>
                             </li>
                             <li class="list-group-item">
                                 <div class="row">
-                                    <p class="col text-center" id="hull"></p>
-                                    <p class="col text-center" id="EDamage"></p>
-                                    <p class="col text-center" id="PDamage"></p>
-                                    <p class="col text-center" id="armor"></p>
-                                    <p class="col text-center" id="shield"></p>
-                                    <p class="col text-center" id="evasion"></p>
-                                    <p class="col text-center" id="speed"></p>
-                                    <p class="col text-center" id="power"></p>
+                                    <p class="col-3 text-center" id="hull"></p>
+                                    <p class="col-1 text-center" id="EDamage"></p>
+                                    <p class="col-1 text-center" id="PDamage"></p>
+                                    <p class="col-1 text-center" id="armor"></p>
+                                    <p class="col-1 text-center" id="shield"></p>
+                                    <p class="col-1 text-center" id="evasion"></p>
+                                    <p class="col-1 text-center" id="speed"></p>
+                                    <p class="col-3 text-center" id="power"></p>
                                 </div>
                             </li>
                         </ul>

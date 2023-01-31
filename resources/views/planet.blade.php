@@ -31,7 +31,7 @@
                 </div>
                 @endif
                 <p class="col-3 text-center">{{$planet['position']}}</p>
-                <p class="col-6 text-center">
+                <p class="col-4 text-center">
                     @foreach($planet['resource'] as $key=>$value)
                         @if($value>0)
                             <span class="badge bg-success text-dark"><img src="storage/img/resource/{{$key}}.png" width="20px">{{$value}}</span>
@@ -40,6 +40,7 @@
                         @endif
                     @endforeach
                 </p>
+                <p class="col-2 text-center"><button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="buildArmy({{$planet['id']}})">招募陆军</button></p>
             </div>
         </li>
         @endforeach

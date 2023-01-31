@@ -37,8 +37,12 @@ class CountryController
         $techFin = json_decode(Country::where(["tag"=>$id])->first()->techs,true);
         $techs = Tech::where(["category"=>$category])->get()->toArray();
         $techList = json_decode(Country::where(["tag"=>$id])->first()->techList,true);
+        $isResearching=[];
+        foreach ($techList as $item) {
+            $isResearching[] = $item['tech'];
+        }
         foreach ($techs as $tech) {
-            if (in_array($tech['preTech'],$techFin)&&!in_array($tech['name'],$techFin)){
+            if (in_array($tech['preTech'],$techFin)&& !in_array($tech['name'],$techFin) && !in_array($tech['name'],$isResearching)){
                 $nextTechs[] = [$tech['name'],$tech['cost']];
                 break;
             }
@@ -222,7 +226,7 @@ class CountryController
         $planets = json_decode(Country::where('tag', $id)->first()->planets,true);
         $resource = json_decode(Country::where('tag', $id)->first()->resource,true);
         foreach($planets as $planet) {
-            $p = Planet::where('owner', $id)->first();
+            $p = Planet::where('id', $planet)->first();
             foreach($resource as $key => $value) {
                 $resource[$key] = 0;
             }
